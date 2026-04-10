@@ -1,0 +1,11 @@
+[project]
+name = "cancel-culture-analysis"
+version = "0.1.0"
+description = "Analysis stage for cancel culture sentiment analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
