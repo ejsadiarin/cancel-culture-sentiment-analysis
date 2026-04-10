@@ -18,21 +18,20 @@ It is intentionally separated so an Instagram scraper can be added later without
 01-collection/tiktok_scraper/
   README.md
   requirements.txt
-  tiktok_scraper/
-    cli.py
-    models.py
-    filters/
-      timeframe.py
-    scraper/
-      session.py
-      profile_scraper.py
-      video_scraper.py
-      comment_scraper.py
-      parsing.py
-    storage/
-      jsonl_writer.py
-    transcription/
-      whisper_transcriber.py
+  cli.py
+  models.py
+  filters/
+    timeframe.py
+  scraper/
+    session.py
+    profile_scraper.py
+    video_scraper.py
+    comment_scraper.py
+    parsing.py
+  storage/
+    jsonl_writer.py
+  transcription/
+    whisper_transcriber.py
 ```
 
 ## Install
@@ -93,6 +92,7 @@ uv run --directory 01-collection/tiktok_scraper python -m tiktok_scraper.cli \
 ```
 
 Notes:
+
 - `--max-comments-per-video 0` means no effective cap (collect as many as discovered).
 - Very large crawls can take hours and may still be limited by TikTok UI/rate controls.
 

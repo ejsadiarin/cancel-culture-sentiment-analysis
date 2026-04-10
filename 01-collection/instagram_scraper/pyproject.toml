@@ -1,0 +1,16 @@
+[project]
+name = "instagram-scraper"
+version = "0.1.0"
+description = "Modular Instagram collection pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "instaloader>=4.14.2",
+]
+
+[project.scripts]
+instagram-scraper = "instagram_scraper.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
