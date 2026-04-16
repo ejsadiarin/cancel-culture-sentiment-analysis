@@ -118,6 +118,7 @@ def run(config: RunConfig) -> int:
         LOGGER.info("Window %s selected=%d", window_label, total_selected)
         for index, video_url in enumerate(selected, start=1):
             remaining = max(total_selected - index, 0)
+            output_basename = f"{window_label}-{index}"
             LOGGER.info(
                 "Scraping video %d/%d window=%s remaining=%d",
                 index,
@@ -147,6 +148,7 @@ def run(config: RunConfig) -> int:
                     video.video_url,
                     window_label=window_label,
                     anchor_id=None,
+                    output_basename=output_basename,
                     output_dir=config.comments_dir,
                 )
                 for comment in comments:

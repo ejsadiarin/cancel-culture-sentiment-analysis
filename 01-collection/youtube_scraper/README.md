@@ -111,6 +111,9 @@ Additional window fields:
 - `window_label` (`pre`, `cancel`, `post`)
 -- `anchor_id` (reserved; not used in manual mode)
 
+Comment dump files are named `pre-1`, `cancel-1`, `post-1`, etc. per window group
+in the CSV order, preserving yt-dlp extensions (`.comments.json` or `.comments.jsonl`).
+
 ## Notes and reliability
 
 - Comment availability depends on `yt-dlp` support for the target video; if comments are

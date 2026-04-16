@@ -47,7 +47,14 @@ class YtDlpClient:
         LOGGER.info("yt-dlp list done url=%s items=%d", url, len(items))
         return items
 
-    def dump_comments(self, url: str, *, output_dir: str) -> Path | None:
+    def dump_comments(
+        self,
+        url: str,
+        *,
+        output_dir: str,
+        output_basename: str | None = None,
+        video_id: str | None = None,
+    ) -> Path | None:
         LOGGER.info("yt-dlp comments start url=%s", url)
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -65,6 +72,13 @@ class YtDlpClient:
             args.extend(["--cache-dir", self.cache_dir])
         self._run(args)
         comments_file = self._find_comments_file(out_dir)
+        if output_basename:
+            comments_file = self._rename_comment_outputs(
+                out_dir,
+                output_basename=output_basename,
+                video_id=video_id,
+                fallback=comments_file,
+            )
         LOGGER.info(
             "yt-dlp comments done url=%s file=%s",
             url,
@@ -127,6 +141,48 @@ class YtDlpClient:
         if not candidates:
             return None
         return max(candidates, key=lambda p: p.stat().st_mtime)
+
+    @staticmethod
+    def _rename_comment_outputs(
+        out_dir: Path,
+        *,
+        output_basename: str,
+        video_id: str | None,
+        fallback: Path | None,
+    ) -> Path | None:
+        comments_file = None
+        if video_id:
+            preferred = out_dir / f"{video_id}.comments.json"
+            if preferred.exists():
+                comments_file = preferred
+            else:
+                preferred = out_dir / f"{video_id}.comments.jsonl"
+                if preferred.exists():
+                    comments_file = preferred
+        if comments_file is None:
+            comments_file = fallback
+        if comments_file is not None:
+            suffix = None
+            name = comments_file.name
+            if name.endswith(".comments.jsonl"):
+                suffix = ".comments.jsonl"
+            elif name.endswith(".comments.json"):
+                suffix = ".comments.json"
+            if suffix:
+                target = out_dir / f"{output_basename}{suffix}"
+                if target.exists():
+                    LOGGER.warning("Skipping rename; target exists %s", target)
+                else:
+                    comments_file = comments_file.rename(target)
+        if video_id:
+            info_file = out_dir / f"{video_id}.info.json"
+            if info_file.exists():
+                info_target = out_dir / f"{output_basename}.info.json"
+                if info_target.exists():
+                    LOGGER.warning("Skipping rename; target exists %s", info_target)
+                else:
+                    info_file.rename(info_target)
+        return comments_file
 
     @staticmethod
     def _run(args: list[str]) -> str:

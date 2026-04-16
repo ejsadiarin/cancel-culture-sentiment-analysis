@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Any
 
 
+ALLOWED_WINDOW_LABELS = {"pre", "post", "cancel"}
+
+
 class JsonlWriter:
     def __init__(self, output_path: str) -> None:
         self.output_path = Path(output_path)
@@ -21,6 +24,10 @@ class JsonlWriter:
 
     def write(self, record: dict[str, Any]) -> bool:
         record_type = record.get("record_type")
+        if record_type == "comment":
+            window_label = record.get("window_label")
+            if window_label not in ALLOWED_WINDOW_LABELS:
+                return False
         key = self._key_for(record)
         if record_type in self._seen and key is not None:
             if key in self._seen[record_type]:

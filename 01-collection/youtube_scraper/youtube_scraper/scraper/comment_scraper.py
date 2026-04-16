@@ -24,9 +24,15 @@ class CommentScraper:
         *,
         window_label: str | None = None,
         anchor_id: str | None = None,
+        output_basename: str | None = None,
         output_dir: str,
     ) -> list[CommentItem]:
-        comments_file = self.client.dump_comments(video_url, output_dir=output_dir)
+        comments_file = self.client.dump_comments(
+            video_url,
+            output_dir=output_dir,
+            output_basename=output_basename,
+            video_id=video_id,
+        )
         if not comments_file:
             return []
         return _parse_comments_file(
