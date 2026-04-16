@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import logging
 import re
 import sys
@@ -191,12 +192,50 @@ def _load_manual_csv(path_value: str) -> dict[str, list[str]]:
         raise FileNotFoundError(f"CSV not found: {path}")
     rows: dict[str, list[str]] = {"pre": [], "cancel": [], "post": []}
     with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        if not reader.fieldnames:
+        # Some exports include leading blank lines, a UTF-8 BOM, or use a
+        # delimiter other than comma. Normalize those cases here.
+        header_line: str | None = None
+        header_line_no = 0
+        while True:
+            line = handle.readline()
+            if line == "":
+                break
+            header_line_no += 1
+            if line.strip():
+                header_line = line
+                break
+
+        if not header_line:
             raise ValueError("CSV must include headers: window,video")
-        for row_index, row in enumerate(reader, start=2):
-            window = str(row.get("window") or "").strip().lower()
-            video_value = str(row.get("video") or "").strip()
+
+        remainder = handle.read()
+        combined = header_line + remainder
+        try:
+            dialect = csv.Sniffer().sniff(combined[:8192], delimiters=",;\t|")
+        except csv.Error:
+            dialect = csv.excel
+        reader = csv.reader(io.StringIO(combined), dialect)
+
+        raw_headers = next(reader, [])
+        headers = [str(h).strip().lstrip("\ufeff").lower() for h in raw_headers]
+        try:
+            window_index = headers.index("window")
+            video_index = headers.index("video")
+        except ValueError as exc:
+            raise ValueError("CSV must include headers: window,video") from exc
+
+        for row_offset, row in enumerate(reader, start=1):
+            row_index = header_line_no + row_offset
+            if not row:
+                continue
+            window = (
+                str(row[window_index]).strip().lower()
+                if window_index < len(row)
+                else ""
+            )
+            video_value = (
+                str(row[video_index]).strip() if video_index < len(row) else ""
+            )
             if not window or not video_value:
                 LOGGER.warning("Skipping row %d missing window/video", row_index)
                 continue
