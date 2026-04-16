@@ -27,6 +27,7 @@ Replace `<module-dir>` with one of:
 
 - `01-collection/tiktok_scraper`
 - `01-collection/instagram_scraper`
+- `01-collection/youtube_scraper`
 - `02-preprocessing`
 - `03-analysis`
 - `04-evaluation`
@@ -78,7 +79,7 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --login-user your_ig_username \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/session_warmup.jsonl
+  --out data/raw/instagram_session_warmup.jsonl
 ```
 
 Run scraper with session auth:
@@ -90,11 +91,12 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --end-date 2025-12-31 \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/instagram_somecreator_2025.jsonl
+  --out data/raw/instagram_somecreator_2025.jsonl
 ```
 
 Process overview:
 
 - TikTok process: profile scrape -> discover video URLs -> per-video metadata/comments -> optional transcript -> JSONL.
 - Instagram process: auth/session load -> profile scrape -> post iteration/date filter -> per-post comments -> JSONL.
-- Both collectors emit compatible record types (`account`, `video`, `comment`) with shared fields (`run_id`, `scraped_at`, `source_account`).
+- YouTube process: anchor video -> channel uploads -> pre/cancel/post windows -> per-video metadata/comments -> JSONL.
+- All collectors emit compatible record types (`account`, `video`, `comment`) with shared fields (`run_id`, `scraped_at`, `source_account`).

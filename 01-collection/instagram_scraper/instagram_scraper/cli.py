@@ -65,7 +65,11 @@ def parse_args(argv: list[str]) -> RunConfig:
     )
     parser.add_argument("--start-date", required=True, help="Start date in YYYY-MM-DD")
     parser.add_argument("--end-date", required=True, help="End date in YYYY-MM-DD")
-    parser.add_argument("--out", required=True, help="Output JSONL path")
+    parser.add_argument(
+        "--out",
+        default="data/raw/instagram_scrape.jsonl",
+        help="Output JSONL path",
+    )
     parser.add_argument("--max-posts", type=int, default=400)
     parser.add_argument("--max-comments-per-post", type=int, default=3000)
     parser.add_argument(

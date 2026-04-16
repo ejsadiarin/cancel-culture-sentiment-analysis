@@ -1,0 +1,16 @@
+[project]
+name = "youtube-scraper"
+version = "0.1.0"
+description = "Modular YouTube collection pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "yt-dlp>=2024.10.7",
+]
+
+[project.scripts]
+youtube-scraper = "youtube_scraper.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"

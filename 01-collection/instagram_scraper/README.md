@@ -69,7 +69,7 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --login-user your_ig_username \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/session_warmup.jsonl
+  --out data/raw/instagram_session_warmup.jsonl
 ```
 
 After that, future runs only need:
@@ -89,7 +89,7 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --end-date 2025-12-31 \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/instagram_somecreator_2025.jsonl
+  --out data/raw/instagram_somecreator_2025.jsonl
 ```
 
 Multiple accounts:
@@ -102,7 +102,7 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --end-date 2026-01-01 \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/instagram_multi.jsonl
+  --out data/raw/instagram_multi.jsonl
 ```
 
 Deeper crawl with safer pacing:
@@ -119,7 +119,7 @@ uv run --directory 01-collection/instagram_scraper python -m instagram_scraper.c
   --max-retries 5 \
   --session-user your_ig_username \
   --session-file 01-collection/instagram_scraper/.ig_session \
-  --out 01-collection/instagram_scraper/data/instagram_deep.jsonl
+  --out data/raw/instagram_deep.jsonl
 ```
 
 Notes:
@@ -132,7 +132,7 @@ Notes:
 - `--account` repeatable username flag
 - `--start-date` lower publish date bound (`YYYY-MM-DD`)
 - `--end-date` upper publish date bound (`YYYY-MM-DD`)
-- `--out` output JSONL path
+- `--out` output JSONL path (default `data/raw/instagram_scrape.jsonl`)
 - `--max-posts` max posts to inspect per account (default `400`)
 - `--max-comments-per-post` max comments per post (default `3000`, `0` = unbounded)
 - `--session-file` path to persistent session file

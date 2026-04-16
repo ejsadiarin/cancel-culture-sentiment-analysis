@@ -63,7 +63,7 @@ uv run --directory 01-collection/tiktok_scraper python -m tiktok_scraper.cli \
   --account someuser \
   --start-date 2025-01-01 \
   --end-date 2025-12-31 \
-  --out 01-collection/tiktok_scraper/data/tiktok_someuser_2025.jsonl
+  --out data/raw/tiktok_someuser_2025.jsonl
 ```
 
 Multiple accounts:
@@ -74,7 +74,7 @@ uv run --directory 01-collection/tiktok_scraper python -m tiktok_scraper.cli \
   --account user2 \
   --start-date 2024-01-01 \
   --end-date 2026-01-01 \
-  --out 01-collection/tiktok_scraper/data/tiktok_multi.jsonl
+  --out data/raw/tiktok_multi.jsonl
 ```
 
 With heavier crawl settings for network analysis:
@@ -88,7 +88,7 @@ uv run --directory 01-collection/tiktok_scraper python -m tiktok_scraper.cli \
   --max-comments-per-video 0 \
   --min-delay 1.2 \
   --max-delay 3.0 \
-  --out 01-collection/tiktok_scraper/data/tiktok_deep.jsonl
+  --out data/raw/tiktok_deep.jsonl
 ```
 
 Notes:
@@ -101,7 +101,7 @@ Notes:
 - `--account` repeatable username flag (without `@` preferred)
 - `--start-date` publish date lower bound (`YYYY-MM-DD`)
 - `--end-date` publish date upper bound (`YYYY-MM-DD`)
-- `--out` output JSONL path
+- `--out` output JSONL path (default `data/raw/tiktok_scrape.jsonl`)
 - `--max-videos` max profile videos to process (default `500`)
 - `--max-comments-per-video` default `5000`, use `0` for unbounded mode
 - `--headless / --no-headless` browser mode (default headless)
