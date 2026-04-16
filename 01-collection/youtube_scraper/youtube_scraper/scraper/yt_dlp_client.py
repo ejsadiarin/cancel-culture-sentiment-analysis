@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 from pathlib import Path
 from typing import Any
+
+
+LOGGER = logging.getLogger("youtube_scraper")
 
 
 class YtDlpClient:
@@ -11,10 +15,12 @@ class YtDlpClient:
         self.cache_dir = cache_dir
 
     def dump_json(self, url: str) -> dict[str, Any]:
+        LOGGER.info("yt-dlp metadata start url=%s", url)
         args = ["yt-dlp", "--dump-json", "--no-playlist", url]
         if self.cache_dir:
             args.extend(["--cache-dir", self.cache_dir])
         payload = self._run(args)
+        LOGGER.info("yt-dlp metadata done url=%s", url)
         return self._parse_json(payload)
 
     def dump_json_entries(
@@ -24,6 +30,7 @@ class YtDlpClient:
         flat: bool = True,
         playlist_end: int = 200,
     ) -> list[dict[str, Any]]:
+        LOGGER.info("yt-dlp list start url=%s", url)
         args = [
             "yt-dlp",
             "--dump-json",
@@ -35,9 +42,13 @@ class YtDlpClient:
         args.append(url)
         if self.cache_dir:
             args.extend(["--cache-dir", self.cache_dir])
-        return list(self._iter_json_entries(args))
+        total = max(1, int(playlist_end))
+        items = list(self._iter_json_entries(args, total_hint=total))
+        LOGGER.info("yt-dlp list done url=%s items=%d", url, len(items))
+        return items
 
     def dump_comments(self, url: str, *, output_dir: str) -> Path | None:
+        LOGGER.info("yt-dlp comments start url=%s", url)
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         output_template = out_dir / "%(id)s.%(ext)s"
@@ -53,7 +64,13 @@ class YtDlpClient:
         if self.cache_dir:
             args.extend(["--cache-dir", self.cache_dir])
         self._run(args)
-        return self._find_comments_file(out_dir)
+        comments_file = self._find_comments_file(out_dir)
+        LOGGER.info(
+            "yt-dlp comments done url=%s file=%s",
+            url,
+            comments_file,
+        )
+        return comments_file
 
     @staticmethod
     def _parse_json(payload: str) -> dict[str, Any]:
@@ -63,7 +80,9 @@ class YtDlpClient:
             return {}
 
     @staticmethod
-    def _iter_json_entries(args: list[str]) -> list[dict[str, Any]]:
+    def _iter_json_entries(
+        args: list[str], *, total_hint: int | None = None
+    ) -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
         process = subprocess.Popen(
             args,
@@ -73,10 +92,22 @@ class YtDlpClient:
         )
         assert process.stdout is not None
         assert process.stderr is not None
+        processed = 0
         for line in process.stdout:
             if not line.strip():
                 continue
             items.append(YtDlpClient._parse_json(line))
+            processed += 1
+            if total_hint is not None:
+                remaining = max(total_hint - processed, 0)
+                LOGGER.info(
+                    "Listing uploads %d/%d remaining=%d",
+                    processed,
+                    total_hint,
+                    remaining,
+                )
+            else:
+                LOGGER.info("Listing uploads processed=%d", processed)
         stderr = process.stderr.read()
         returncode = process.wait()
         if returncode != 0:

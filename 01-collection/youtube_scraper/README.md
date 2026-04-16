@@ -1,25 +1,13 @@
-# YouTube Scraper (Modular)
+# YouTube Scraper (Manual List)
 
 This module is a standalone YouTube collection pipeline under `01-collection/youtube_scraper`.
-It is designed to mirror the TikTok/Instagram JSONL output shape so downstream preprocessing
-and analysis can share logic.
+It now runs from a manual CSV list of videos (pre/cancel/post) that you provide.
 
 ## What it collects
 
-- Channel/account snapshot metadata
-- Anchor apology video metadata
-- Pre/cancel/post window video metadata
-- Deep comment collection per video (via `yt-dlp --write-comments`)
+- Video metadata for each provided URL/ID
+- Comment collection per video (via `yt-dlp --write-comments`)
 - JSONL output for analytics pipelines
-
-## Defaults (confirmed)
-
-- Pre window: 30 days before anchor (exclusive of anchor day)
-- Cancel window: anchor day through +7 days
-- Post window: +8 days through +30 days
-- Max videos per window: 50
-- Max comments per video: 1000
-- Output: single JSONL per anchor run
 
 ## Project layout
 
@@ -57,27 +45,45 @@ From repository root:
 
 ```bash
 uv run --directory 01-collection/youtube_scraper python -m youtube_scraper.cli \
-  --anchor-url "https://www.youtube.com/watch?v=VIDEO_ID" \
-  --out data/raw/youtube_anchor.jsonl
+  --manual-csv data/gdragon.csv
 ```
+
+The output will be created under `data/<person>/` where `<person>` is the CSV filename stem.
+For example `data/gdragon.csv` writes to:
+
+- `data/gdragon/gdragon_youtube.jsonl`
+- `data/gdragon/comments/`
+
+## CSV format
+
+Required headers: `window,video`
+
+Example:
+
+```text
+window,video
+pre,https://www.youtube.com/watch?v=AAA
+cancel,BBB123
+post,https://www.youtube.com/watch?v=CCC
+```
+
+Valid `window` values: `pre`, `cancel`, `post`.
+
+The `video` column accepts full YouTube URLs or raw video IDs. IDs are normalized to
+`https://www.youtube.com/watch?v=<ID>`.
 
 ## CLI options
 
-- `--anchor-url` YouTube video URL used as the apology anchor
-- `--out` output JSONL path (default `data/raw/youtube_anchor.jsonl`)
-- `--pre-days` days before anchor (default `30`)
-- `--cancel-days` days after anchor to treat as cancel window (default `7`)
-- `--post-days` days after cancel window (default `30`)
-- `--max-videos-per-window` default `50`
+- `--manual-csv` CSV path with `window,video` columns
+- `--out` output JSONL path (default `data/<person>/<person>_youtube.jsonl`)
 - `--max-comments-per-video` default `1000`, use `0` for unbounded mode
-- `--comments-dir` directory to store comment dump files (default `data/raw/youtube_comments`)
+- `--comments-dir` directory to store comment dump files (default `data/<person>/comments`)
 - `--cache-dir` optional `yt-dlp` cache directory
 
 ## Output format (JSONL)
 
 Each line is one JSON record with `record_type`:
 
-- `account`
 - `video`
 - `comment`
 - `transcript` (reserved for future use)
@@ -92,15 +98,13 @@ Common fields:
 Additional window fields:
 
 - `window_label` (`pre`, `cancel`, `post`)
-- `anchor_id` (video id of the apology anchor)
+-- `anchor_id` (reserved; not used in manual mode)
 
 ## Notes and reliability
 
 - Comment availability depends on `yt-dlp` support for the target video; if comments are
   restricted or unavailable, the scraper will still emit video metadata and continue.
 - For large crawls, expect longer runtimes and occasional partial comment dumps.
-- Language filtering (PH English and Korean) is recommended in preprocessing rather than
-  collection to avoid losing data due to detection noise.
 
 ## Legal and ethical usage
 
