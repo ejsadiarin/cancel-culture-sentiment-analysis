@@ -1,6 +1,8 @@
 # cancel-culture-sentiment-analysis
 
-Sentiment and network analysis of cancel culture discourse (PH vs KR), organized as a modular pipeline.
+Sentiment (emotion) trajectory and social network analysis of cancel culture discourse on YouTube, organized as a modular pipeline.
+
+Current dataset focus: South Korea (KR) longitudinal cases with `pre` / `cancel` / `post` windows (e.g., `data/bodeoum_tv`, `data/mimiminu`).
 
 ## Pipeline modules
 
@@ -48,9 +50,13 @@ Process overview:
 - YouTube process: manual CSV -> per-video metadata/comments -> JSONL.
 - All collectors emit compatible record types (`video`, `comment`) with shared fields (`run_id`, `scraped_at`, `source_account`).
 
+Planned/optional additions:
+
+- Transcripts: download YouTube auto-captions (or temporary audio) and generate text transcripts (e.g., Whisper). Store only transcript text outputs in-repo; keep raw audio/video out of git.
+
 ### YouTube CSV example
 
-Create a CSV like `data/input/gdragon.csv`:
+Create a CSV like `data/input/mimiminu.csv` (or `data/input/bodeoum_tv.csv`):
 
 ```text
 window,video
@@ -72,3 +78,8 @@ Outputs:
 
 - `data/gdragon/gdragon_youtube.jsonl`
 - `data/gdragon/comments/`
+
+Existing examples in this repo:
+
+- `data/bodeoum_tv/` (metadata JSONL + per-video comment `.info.json` files)
+- `data/mimiminu/` (metadata JSONL + per-video comment `.info.json` files)
