@@ -47,3 +47,28 @@ Process overview:
 
 - YouTube process: manual CSV -> per-video metadata/comments -> JSONL.
 - All collectors emit compatible record types (`video`, `comment`) with shared fields (`run_id`, `scraped_at`, `source_account`).
+
+### YouTube CSV example
+
+Create a CSV like `data/input/gdragon.csv`:
+
+```text
+window,video
+pre,https://www.youtube.com/watch?v=J6Kp5l2xF5E
+pre,5LmBWb8zWfI
+cancel,https://www.youtube.com/watch?v=6UeLUY3h3s0
+post,8T7J6f0WzH8
+post,https://www.youtube.com/watch?v=4tBnF46ybZk
+```
+
+Run:
+
+```bash
+uv run --directory 01-collection/youtube_scraper python -m youtube_scraper.cli \
+  --manual-csv data/input/gdragon.csv
+```
+
+Outputs:
+
+- `data/gdragon/gdragon_youtube.jsonl`
+- `data/gdragon/comments/`

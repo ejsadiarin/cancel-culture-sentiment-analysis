@@ -45,7 +45,7 @@ From repository root:
 
 ```bash
 uv run --directory 01-collection/youtube_scraper python -m youtube_scraper.cli \
-  --manual-csv data/gdragon.csv
+  --manual-csv data/input/gdragon.csv
 ```
 
 The output will be created under `data/<person>/` where `<person>` is the CSV filename stem.
@@ -65,6 +65,17 @@ window,video
 pre,https://www.youtube.com/watch?v=AAA
 cancel,BBB123
 post,https://www.youtube.com/watch?v=CCC
+```
+
+Sample file name: `data/input/gdragon.csv`
+
+```text
+window,video
+pre,https://www.youtube.com/watch?v=J6Kp5l2xF5E
+pre,5LmBWb8zWfI
+cancel,https://www.youtube.com/watch?v=6UeLUY3h3s0
+post,8T7J6f0WzH8
+post,https://www.youtube.com/watch?v=4tBnF46ybZk
 ```
 
 Valid `window` values: `pre`, `cancel`, `post`.
