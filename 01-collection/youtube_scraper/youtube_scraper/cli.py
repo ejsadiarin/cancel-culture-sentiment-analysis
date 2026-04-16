@@ -29,6 +29,7 @@ class RunConfig:
     max_comments_per_video: int
     cache_dir: str | None
     comments_dir: str
+    playlist_end: int
 
 
 def parse_args(argv: list[str]) -> RunConfig:
@@ -46,6 +47,12 @@ def parse_args(argv: list[str]) -> RunConfig:
     parser.add_argument("--post-days", type=int, default=30)
     parser.add_argument("--max-videos-per-window", type=int, default=50)
     parser.add_argument("--max-comments-per-video", type=int, default=1000)
+    parser.add_argument(
+        "--playlist-end",
+        type=int,
+        default=50,
+        help="Max uploads to scan from channel feed",
+    )
     parser.add_argument(
         "--cache-dir",
         default=None,
@@ -74,6 +81,7 @@ def parse_args(argv: list[str]) -> RunConfig:
         max_comments_per_video=int(args.max_comments_per_video),
         cache_dir=args.cache_dir,
         comments_dir=args.comments_dir,
+        playlist_end=max(1, int(args.playlist_end)),
     )
 
 
@@ -92,11 +100,15 @@ def run(config: RunConfig) -> int:
 
     LOGGER.info("Starting run_id=%s anchor=%s", run_id, config.anchor_url)
 
+    LOGGER.info("Resolving anchor metadata")
+
     anchor_payload, account_snapshot = channel_scraper.scrape_anchor(config.anchor_url)
     anchor_video_id = str(anchor_payload.get("id") or "")
     anchor_date = parse_upload_date(anchor_payload.get("upload_date"))
-    channel_url = anchor_payload.get("channel_url") or anchor_payload.get(
-        "uploader_url"
+    channel_url = (
+        account_snapshot.scrape_url
+        or anchor_payload.get("channel_url")
+        or anchor_payload.get("uploader_url")
     )
 
     if not anchor_video_id or not anchor_date or not channel_url:
@@ -105,14 +117,45 @@ def run(config: RunConfig) -> int:
     writer.write(account_snapshot.to_record(run_id=run_id, scraped_at=scraped_at))
 
     window_map = _build_windows(anchor_date, config)
-    uploads = channel_scraper.list_uploads(str(channel_url))
+    LOGGER.info("Listing channel uploads")
+    uploads = channel_scraper.list_uploads(
+        str(channel_url),
+        playlist_end=config.playlist_end,
+    )
+    if uploads:
+        sample = uploads[0]
+        LOGGER.debug(
+            "Upload sample keys=%s",
+            ",".join(sorted(sample.keys())) if isinstance(sample, dict) else "",
+        )
+    earliest_start = min(start for start, _ in window_map.values())
+    latest_end = max(end for _, end in window_map.values())
+    run_year = anchor_date.year
+    uploads_with_dates = _resolve_upload_dates(
+        uploads,
+        earliest_start=earliest_start,
+        latest_end=latest_end,
+        run_year=run_year,
+        video_scraper=video_scraper,
+        channel_id=account_snapshot.channel_id,
+    )
+    LOGGER.info(
+        "Resolved upload dates %d/%d",
+        len(uploads_with_dates),
+        len(uploads),
+    )
 
     total_videos = 0
     total_comments = 0
     failures = 0
 
     for window_label, (start, end) in window_map.items():
-        selected = _select_uploads(uploads, start, end, config.max_videos_per_window)
+        selected = _select_uploads(
+            uploads_with_dates,
+            start,
+            end,
+            config.max_videos_per_window,
+        )
         LOGGER.info(
             "Window %s range=%s..%s selected=%d",
             window_label,
@@ -120,10 +163,19 @@ def run(config: RunConfig) -> int:
             end.date(),
             len(selected),
         )
-        for entry in selected:
+        total_selected = len(selected)
+        for index, entry in enumerate(selected, start=1):
             video_url = entry.get("url") or entry.get("webpage_url")
             if not video_url:
                 continue
+            remaining = max(total_selected - index, 0)
+            LOGGER.info(
+                "Scraping video %d/%d window=%s remaining=%d",
+                index,
+                total_selected,
+                window_label,
+                remaining,
+            )
             try:
                 video = video_scraper.scrape_video(
                     account_snapshot.channel_id,
@@ -153,6 +205,9 @@ def run(config: RunConfig) -> int:
                         comment.to_record(run_id=run_id, scraped_at=scraped_at)
                     ):
                         total_comments += 1
+                LOGGER.info(
+                    "Comments scraped video=%s count=%d", video.video_id, len(comments)
+                )
             except Exception as exc:  # noqa: BLE001
                 LOGGER.warning("Comments scrape failed %s: %s", video.video_id, exc)
                 failures += 1
@@ -189,22 +244,129 @@ def _build_windows(
 
 
 def _select_uploads(
-    uploads: list[dict[str, object]],
+    uploads: list[tuple[datetime, dict[str, object]]],
     start: datetime,
     end: datetime,
     limit: int,
 ) -> list[dict[str, object]]:
     candidates: list[tuple[datetime, dict[str, object]]] = []
-    for entry in uploads:
-        if not isinstance(entry, dict):
-            continue
-        upload_date = parse_upload_date(entry.get("upload_date"))
-        if not upload_date:
-            continue
+    for upload_date, entry in uploads:
         if start <= upload_date <= end:
             candidates.append((upload_date, entry))
     candidates.sort(key=lambda item: item[0])
     return [entry for _, entry in candidates[:limit]]
+
+
+def _resolve_upload_dates(
+    uploads: list[dict[str, object]],
+    *,
+    earliest_start: datetime,
+    latest_end: datetime,
+    run_year: int,
+    video_scraper: VideoScraper,
+    channel_id: str,
+) -> list[tuple[datetime, dict[str, object]]]:
+    resolved: list[tuple[datetime, dict[str, object]]] = []
+    cache: dict[str, datetime | None] = {}
+    scanned = 0
+    total = len(uploads)
+    for entry in uploads:
+        if not isinstance(entry, dict):
+            continue
+        scanned += 1
+        remaining = max(total - scanned, 0)
+        LOGGER.info(
+            "Resolving upload dates %d/%d remaining=%d", scanned, total, remaining
+        )
+        cache_key = _cache_key(entry)
+        if cache_key in cache:
+            upload_date = cache[cache_key]
+        else:
+            upload_date = _resolve_upload_datetime(
+                entry,
+                video_scraper=video_scraper,
+                channel_id=channel_id,
+            )
+            cache[cache_key] = upload_date
+        if upload_date:
+            upload_date = _normalize_upload_date(
+                upload_date,
+                run_year=run_year,
+            )
+            LOGGER.debug("Resolved %s -> %s", cache_key, upload_date.date())
+        else:
+            LOGGER.debug("Unresolved %s", cache_key)
+        if upload_date and earliest_start <= upload_date <= latest_end:
+            resolved.append((upload_date, entry))
+    LOGGER.info("Resolved uploads scanned=%d resolved=%d", scanned, len(resolved))
+    return resolved
+
+
+def _normalize_upload_date(upload_date: datetime, *, run_year: int) -> datetime:
+    if upload_date.year > run_year:
+        return upload_date.replace(year=run_year)
+    return upload_date
+
+
+def _resolve_upload_datetime(
+    entry: dict[str, object],
+    *,
+    video_scraper: VideoScraper,
+    channel_id: str,
+) -> datetime | None:
+    upload_date = parse_upload_date(entry.get("upload_date"))
+    if upload_date:
+        return upload_date
+    upload_date = _parse_timestamp(
+        entry.get("timestamp")
+        or entry.get("release_timestamp")
+        or entry.get("release_time")
+    )
+    if upload_date:
+        return upload_date
+    video_url = _extract_video_url(entry)
+    if not video_url:
+        return None
+    try:
+        video = video_scraper.scrape_video(channel_id, video_url)
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.debug("Upload date resolve failed %s: %s", video_url, exc)
+        return None
+    return video.create_time
+
+
+def _cache_key(entry: dict[str, object]) -> str:
+    candidate = entry.get("id") or entry.get("webpage_url") or entry.get("url")
+    if not candidate:
+        return "__unknown__"
+    return str(candidate).strip() or "__unknown__"
+
+
+def _parse_timestamp(value: object) -> datetime | None:
+    if value is None:
+        return None
+    if not isinstance(value, (int, float, str)):
+        return None
+    try:
+        timestamp = float(value)
+    except (TypeError, ValueError, OSError):
+        return None
+    try:
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _extract_video_url(entry: dict[str, object]) -> str | None:
+    candidate = entry.get("webpage_url") or entry.get("url") or entry.get("id")
+    if not candidate:
+        return None
+    text = str(candidate).strip()
+    if not text:
+        return None
+    if text.startswith("http"):
+        return text
+    return f"https://www.youtube.com/watch?v={text}"
 
 
 def main() -> int:

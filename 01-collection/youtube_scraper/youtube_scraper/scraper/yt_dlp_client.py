@@ -17,12 +17,25 @@ class YtDlpClient:
         payload = self._run(args)
         return self._parse_json(payload)
 
-    def dump_json_entries(self, url: str) -> list[dict[str, Any]]:
-        args = ["yt-dlp", "--dump-json", "--flat-playlist", url]
+    def dump_json_entries(
+        self,
+        url: str,
+        *,
+        flat: bool = True,
+        playlist_end: int = 200,
+    ) -> list[dict[str, Any]]:
+        args = [
+            "yt-dlp",
+            "--dump-json",
+            "--playlist-end",
+            str(max(1, int(playlist_end))),
+        ]
+        if flat:
+            args.append("--flat-playlist")
+        args.append(url)
         if self.cache_dir:
             args.extend(["--cache-dir", self.cache_dir])
-        payload = self._run(args)
-        return [self._parse_json(line) for line in payload.splitlines() if line.strip()]
+        return list(self._iter_json_entries(args))
 
     def dump_comments(self, url: str, *, output_dir: str) -> Path | None:
         out_dir = Path(output_dir)
@@ -48,6 +61,32 @@ class YtDlpClient:
             return json.loads(payload)
         except json.JSONDecodeError:
             return {}
+
+    @staticmethod
+    def _iter_json_entries(args: list[str]) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        process = subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        assert process.stdout is not None
+        assert process.stderr is not None
+        for line in process.stdout:
+            if not line.strip():
+                continue
+            items.append(YtDlpClient._parse_json(line))
+        stderr = process.stderr.read()
+        returncode = process.wait()
+        if returncode != 0:
+            raise subprocess.CalledProcessError(
+                returncode,
+                args,
+                output="",
+                stderr=stderr,
+            )
+        return items
 
     @staticmethod
     def _find_comments_file(out_dir: Path) -> Path | None:
