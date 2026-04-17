@@ -1,0 +1,16 @@
+[project]
+name = "whisper-transcriber"
+version = "0.1.0"
+description = "Hybrid YouTube subtitles + Whisper transcription pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper>=1.1.0",
+]
+
+[project.scripts]
+whisper-transcriber = "whisper_transcriber.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
