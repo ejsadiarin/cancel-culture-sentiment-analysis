@@ -757,7 +757,11 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "faster-whisper" },
+    { name = "tqdm" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "faster-whisper", specifier = ">=1.1.0" }]
+requires-dist = [
+    { name = "faster-whisper", specifier = ">=1.1.0" },
+    { name = "tqdm", specifier = ">=4.66.0" },
+]

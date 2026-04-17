@@ -104,6 +104,18 @@ uv run --directory 01-collection/whisper_transcriber python -m whisper_transcrib
 
 Note: `large-v3` is substantially slower and uses more RAM than `small`.
 
+## Window progress bar (recommended for long runs)
+
+Enable a single tqdm bar for each window (pre/cancel/post). This tracks transcription time only.
+
+```bash
+uv run --directory 01-collection/whisper_transcriber python -m whisper_transcriber.cli \
+  --manual-csv data/input/mimiminu.csv \
+  --lang ko \
+  --model large-v3 \
+  --progress-window
+```
+
 ## Run examples
 
 Run both CSVs (CPU, works everywhere):
@@ -136,6 +148,7 @@ uv run --directory 01-collection/whisper_transcriber python -m whisper_transcrib
 - `--device`: `auto`, `cuda`, or `cpu` (default `auto`)
 - `--compute-type`: e.g., `int8`, `int8_float16`, `float16` (default `int8`)
 - `--keep-audio`: do not delete temp audio (debugging)
+- `--progress-window`: show per-window tqdm progress for transcription
 
 ## Notes
 

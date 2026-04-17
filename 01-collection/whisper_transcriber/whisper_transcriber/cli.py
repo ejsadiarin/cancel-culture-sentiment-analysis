@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from faster_whisper import WhisperModel
+from tqdm import tqdm
 
 LOGGER = logging.getLogger("whisper_transcriber")
 
@@ -27,6 +28,32 @@ class RunConfig:
     keep_audio: bool
     yt_dlp_path: str
     window: str | None
+    progress_window: bool
+
+
+@dataclass(slots=True)
+class WindowProgress:
+    bar: tqdm
+    file_duration: float | None
+    file_progress: float = 0.0
+
+    def update_to(self, seconds: float) -> None:
+        if self.bar is None:
+            return
+        if seconds < 0:
+            return
+        if self.file_duration is not None:
+            seconds = min(seconds, self.file_duration)
+        delta = seconds - self.file_progress
+        if delta <= 0:
+            return
+        self.bar.update(delta)
+        self.file_progress = seconds
+
+    def finalize(self) -> None:
+        if self.file_duration is None:
+            return
+        self.update_to(self.file_duration)
 
 
 def parse_args(argv: list[str]) -> RunConfig:
@@ -79,6 +106,11 @@ def parse_args(argv: list[str]) -> RunConfig:
         default=None,
         help="Path to yt-dlp binary (default: auto-detect)",
     )
+    parser.add_argument(
+        "--progress-window",
+        action="store_true",
+        help="Show a single progress bar per window (transcription only)",
+    )
     parser.add_argument("--log-level", default="INFO")
 
     args = parser.parse_args(argv)
@@ -108,6 +140,7 @@ def parse_args(argv: list[str]) -> RunConfig:
         keep_audio=bool(args.keep_audio),
         yt_dlp_path=str(yt_dlp_path),
         window=str(args.window) if args.window else None,
+        progress_window=bool(args.progress_window),
     )
 
 
@@ -151,10 +184,40 @@ def run(config: RunConfig) -> int:
     for window_label in windows_to_process:
         selected = manual_groups[window_label]
         total_selected = len(selected)
+        duration_cache: dict[str, float] = {}
+        progress_bar: tqdm | None = None
+        if config.progress_window and total_selected:
+            total_seconds = 0.0
+            for video_url in selected:
+                if not _extract_video_id(video_url):
+                    continue
+                duration = _yt_dlp_duration_seconds(
+                    yt_dlp_path=config.yt_dlp_path,
+                    video_url=video_url,
+                )
+                if duration is None:
+                    continue
+                duration_cache[video_url] = duration
+                total_seconds += duration
+            progress_bar = tqdm(
+                total=total_seconds if total_seconds > 0 else None,
+                unit="s",
+                unit_scale=True,
+                desc=f"window {window_label}",
+                leave=True,
+            )
         LOGGER.info("Window %s selected=%d", window_label, total_selected)
         for index, video_url in enumerate(selected, start=1):
             output_basename = f"{window_label}-{index}"
             remaining = max(total_selected - index, 0)
+            window_progress = (
+                WindowProgress(
+                    bar=progress_bar,
+                    file_duration=duration_cache.get(video_url),
+                )
+                if progress_bar is not None
+                else None
+            )
 
             video_id = _extract_video_id(video_url)
             if not video_id:
@@ -180,6 +243,8 @@ def run(config: RunConfig) -> int:
 
             if txt_out.exists() and whisper_vtt.exists():
                 LOGGER.info("Transcript already exists; skipping %s", output_basename)
+                if window_progress is not None:
+                    window_progress.finalize()
                 continue
 
             if video_id in cache:
@@ -188,6 +253,8 @@ def run(config: RunConfig) -> int:
                 _copy_if_missing(cached.get("vtt_whisper"), whisper_vtt)
                 if txt_out.exists() and whisper_vtt.exists():
                     LOGGER.info("Reused cached transcript for %s", output_basename)
+                    if window_progress is not None:
+                        window_progress.finalize()
                     continue
 
             if _migrate_legacy_transcripts(
@@ -203,6 +270,8 @@ def run(config: RunConfig) -> int:
                     basename=output_basename,
                     lang=config.lang,
                 )
+                if window_progress is not None:
+                    window_progress.finalize()
                 continue
 
             if whisper_model is None:
@@ -251,6 +320,7 @@ def run(config: RunConfig) -> int:
                     lang=config.lang,
                     out_vtt_path=whisper_vtt,
                     out_txt_path=txt_out,
+                    progress=window_progress,
                 )
                 _update_cache_from_outputs(
                     cache=cache,
@@ -268,6 +338,8 @@ def run(config: RunConfig) -> int:
                     exc,
                 )
                 failures += 1
+                if window_progress is not None:
+                    window_progress.finalize()
             finally:
                 if not config.keep_audio:
                     try:
@@ -275,6 +347,8 @@ def run(config: RunConfig) -> int:
                             audio_path.unlink()
                     except OSError:
                         pass
+        if progress_bar is not None:
+            progress_bar.close()
 
     if failures or skipped:
         LOGGER.info(
@@ -515,6 +589,7 @@ def _whisper_to_vtt_and_txt(
     lang: str,
     out_vtt_path: Path,
     out_txt_path: Path,
+    progress: WindowProgress | None = None,
 ) -> None:
     segments, _info = model.transcribe(
         str(audio_path),
@@ -526,6 +601,8 @@ def _whisper_to_vtt_and_txt(
     vtt_lines = ["WEBVTT", ""]
     txt_lines: list[str] = []
     for seg in segments:
+        if progress is not None:
+            progress.update_to(float(seg.end))
         start = _format_vtt_time(seg.start)
         end = _format_vtt_time(seg.end)
         text = (seg.text or "").strip()
@@ -535,6 +612,9 @@ def _whisper_to_vtt_and_txt(
         vtt_lines.append(text)
         vtt_lines.append("")
         txt_lines.append(text)
+
+    if progress is not None:
+        progress.finalize()
 
     out_vtt_path.write_text("\n".join(vtt_lines) + "\n", encoding="utf-8")
     out_txt_path.write_text(
@@ -554,6 +634,32 @@ def _format_vtt_time(seconds: float) -> str:
     m = m_total % 60
     h = m_total // 60
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
+
+
+def _yt_dlp_duration_seconds(*, yt_dlp_path: str, video_url: str) -> float | None:
+    cmd = [
+        yt_dlp_path,
+        "--no-playlist",
+        "--print",
+        "%(duration)s",
+        video_url,
+    ]
+    proc = _run_yt_dlp(cmd)
+    if proc.returncode != 0:
+        LOGGER.warning("yt-dlp duration lookup failed: %s", proc.stdout.strip())
+        return None
+    for line in proc.stdout.splitlines():
+        value = line.strip()
+        if not value:
+            continue
+        try:
+            duration = float(value)
+        except ValueError:
+            continue
+        if duration <= 0:
+            return None
+        return duration
+    return None
 
 
 def _cuda_available() -> bool:
