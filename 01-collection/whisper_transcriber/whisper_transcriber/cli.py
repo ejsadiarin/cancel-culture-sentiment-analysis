@@ -26,6 +26,7 @@ class RunConfig:
     compute_type: str
     keep_audio: bool
     yt_dlp_path: str
+    window: str | None
 
 
 def parse_args(argv: list[str]) -> RunConfig:
@@ -36,6 +37,12 @@ def parse_args(argv: list[str]) -> RunConfig:
         "--manual-csv",
         required=True,
         help="CSV with columns window,video (pre/cancel/post)",
+    )
+    parser.add_argument(
+        "--window",
+        default=None,
+        choices=("pre", "cancel", "post"),
+        help="Only process a single window (pre/cancel/post). Default: all windows.",
     )
     parser.add_argument(
         "--out-dir",
@@ -99,6 +106,7 @@ def parse_args(argv: list[str]) -> RunConfig:
         compute_type=str(args.compute_type),
         keep_audio=bool(args.keep_audio),
         yt_dlp_path=str(yt_dlp_path),
+        window=str(args.window) if args.window else None,
     )
 
 
@@ -136,7 +144,10 @@ def run(config: RunConfig) -> int:
     # Cache by video_id so duplicates across windows can reuse outputs without re-download.
     cache: dict[str, dict[str, Path]] = {}
 
-    for window_label in ("pre", "cancel", "post"):
+    windows_to_process = (
+        (config.window,) if config.window else ("pre", "cancel", "post")
+    )
+    for window_label in windows_to_process:
         selected = manual_groups[window_label]
         total_selected = len(selected)
         LOGGER.info("Window %s selected=%d", window_label, total_selected)
