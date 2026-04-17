@@ -22,6 +22,55 @@ Files per video:
 
 From repository root:
 
+### 1) Install uv
+
+macOS:
+
+```bash
+brew install uv
+```
+
+Linux:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://astral.sh/uv/install.ps1 | iex
+```
+
+Verify:
+
+```bash
+uv --version
+```
+
+### 2) Install yt-dlp (required)
+
+macOS:
+
+```bash
+brew install yt-dlp ffmpeg
+```
+
+Fedora:
+
+```bash
+sudo dnf install -y yt-dlp ffmpeg
+```
+
+Ubuntu/Debian:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y yt-dlp ffmpeg
+```
+
+### 3) Create venv + sync deps
+
 ```bash
 uv venv 01-collection/whisper_transcriber/.venv
 uv sync --directory 01-collection/whisper_transcriber
@@ -35,11 +84,47 @@ uv run --directory 01-collection/whisper_transcriber python -m whisper_transcrib
   --manual-csv data/input/mimiminu.csv \
   --lang ko \
   --model small \
-  --device cuda \
   --compute-type int8
 ```
 
 Defaults are chosen to work well on low-VRAM GPUs (e.g., GTX 1050 Ti): `model=small`, `compute-type=int8`.
+
+## Korean accuracy (recommended)
+
+For research-quality Korean transcription, use `large-v3` when possible. On Mac (Apple Silicon), run CPU mode:
+
+```bash
+uv run --directory 01-collection/whisper_transcriber python -m whisper_transcriber.cli \
+  --manual-csv data/input/mimiminu.csv \
+  --lang ko \
+  --model large-v3 \
+  --device cpu \
+  --compute-type int8
+```
+
+Note: `large-v3` is substantially slower and uses more RAM than `small`.
+
+## Run examples
+
+Run both CSVs (CPU, works everywhere):
+
+```bash
+uv run --directory 01-collection/whisper_transcriber python -m whisper_transcriber.cli \
+  --manual-csv data/input/bodeoum_tv.csv \
+  --lang ko --model large-v3 --device cpu --compute-type int8
+
+uv run --directory 01-collection/whisper_transcriber python -m whisper_transcriber.cli \
+  --manual-csv data/input/mimiminu.csv \
+  --lang ko --model large-v3 --device cpu --compute-type int8
+```
+
+Run with NVIDIA GPU (e.g., 2080 Ti):
+
+```bash
+uv run --directory 01-collection/whisper_transcriber python -m whisper_transcriber.cli \
+  --manual-csv data/input/bodeoum_tv.csv \
+  --lang ko --model large-v3 --device cuda --compute-type float16
+```
 
 ## CLI options
 
@@ -48,7 +133,7 @@ Defaults are chosen to work well on low-VRAM GPUs (e.g., GTX 1050 Ti): `model=sm
 - `--tmp-dir`: temp directory for audio downloads (default `data/<person>/.tmp_audio`)
 - `--lang`: preferred subtitle language (default `ko`)
 - `--model`: Whisper model size (default `small`)
-- `--device`: `cuda` or `cpu` (default `cuda`)
+- `--device`: `auto`, `cuda`, or `cpu` (default `auto`)
 - `--compute-type`: e.g., `int8`, `int8_float16`, `float16` (default `int8`)
 - `--keep-audio`: do not delete temp audio (debugging)
 

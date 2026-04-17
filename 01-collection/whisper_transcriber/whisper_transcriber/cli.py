@@ -33,6 +33,7 @@ def parse_args(argv: list[str]) -> RunConfig:
     parser = argparse.ArgumentParser(
         description="Transcribe YouTube audio locally using faster-whisper"
     )
+    default_device = "auto"
     parser.add_argument(
         "--manual-csv",
         required=True,
@@ -58,9 +59,9 @@ def parse_args(argv: list[str]) -> RunConfig:
     parser.add_argument("--model", default="small", help="Whisper model size")
     parser.add_argument(
         "--device",
-        default="cuda",
-        choices=("cuda", "cpu"),
-        help="Compute device",
+        default=default_device,
+        choices=("cuda", "cpu", "auto"),
+        help="Compute device (auto selects cuda if available, else cpu)",
     )
     parser.add_argument(
         "--compute-type",
@@ -205,21 +206,26 @@ def run(config: RunConfig) -> int:
                 continue
 
             if whisper_model is None:
+                desired_device = str(config.device).lower()
+                resolved_device = desired_device
+                if desired_device == "auto":
+                    resolved_device = "cuda" if _cuda_available() else "cpu"
+
                 LOGGER.info(
                     "Loading Whisper model=%s device=%s compute_type=%s",
                     config.model,
-                    config.device,
+                    resolved_device,
                     config.compute_type,
                 )
                 try:
                     whisper_model = WhisperModel(
                         config.model,
-                        device=config.device,
+                        device=resolved_device,
                         compute_type=config.compute_type,
                     )
                 except RuntimeError as exc:
                     # Common on shared machines: CUDA runtime/driver mismatch.
-                    if str(config.device).lower() == "cuda":
+                    if resolved_device == "cuda":
                         LOGGER.warning(
                             "Failed to init Whisper on CUDA (%s); falling back to CPU",
                             exc,
@@ -548,6 +554,17 @@ def _format_vtt_time(seconds: float) -> str:
     m = m_total % 60
     h = m_total // 60
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
+
+
+def _cuda_available() -> bool:
+    try:
+        import ctranslate2
+    except Exception:
+        return False
+    try:
+        return ctranslate2.get_cuda_device_count() > 0
+    except Exception:
+        return False
 
 
 if __name__ == "__main__":
