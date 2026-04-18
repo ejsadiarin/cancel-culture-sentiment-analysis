@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "Preprocessing stage for cancel culture sentiment analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pandas>=2.2.2",
+    "numpy>=1.26.4",
+    "tqdm>=4.66.4",
+    "python-dateutil>=2.9.0.post0",
+]
 
 [build-system]
 requires = ["hatchling>=1.25.0"]
