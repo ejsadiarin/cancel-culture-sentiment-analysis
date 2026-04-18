@@ -42,3 +42,11 @@ uv run --directory 02-preprocessing python -V
 ```
 
 Keep dependencies for preprocessing in `02-preprocessing/pyproject.toml` so they do not affect other stages.
+
+## CLI
+
+Run the notebook via the module CLI:
+
+```bash
+uv run --directory 02-preprocessing preprocessing
+```
