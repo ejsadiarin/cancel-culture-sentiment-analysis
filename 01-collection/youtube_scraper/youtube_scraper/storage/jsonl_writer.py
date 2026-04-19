@@ -12,12 +12,33 @@ class JsonlWriter:
     def __init__(self, output_path: str) -> None:
         self.output_path = Path(output_path)
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
-        self._fh = self.output_path.open("a", encoding="utf-8")
         self._seen: dict[str, set[str]] = {
             "video": set(),
             "comment": set(),
             "transcript": set(),
         }
+        self._load_seen()
+        self._fh = self.output_path.open("a", encoding="utf-8")
+
+    def _load_seen(self) -> None:
+        if not self.output_path.exists():
+            return
+        try:
+            with self.output_path.open("r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    record_type = record.get("record_type")
+                    key = self._key_for(record)
+                    if record_type in self._seen and key is not None:
+                        self._seen[record_type].add(key)
+        except OSError:
+            return
 
     def close(self) -> None:
         self._fh.close()
