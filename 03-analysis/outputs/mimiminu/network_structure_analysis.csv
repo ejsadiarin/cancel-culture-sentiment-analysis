@@ -1,0 +1,11 @@
+metric,value
+edge_amplification,0.19228843264897347
+density_amplification,3.6326450990666057
+node_amplification,0.23019721952796637
+gini_amplification,1.012647672484836
+pre_degree_gini,0.7972377253238407
+cancel_degree_gini,0.8073209269662922
+post_degree_gini,0.8086543173188048
+pre_hub_dominance,54.20881321982974
+cancel_hub_dominance,64.89583333333333
+post_hub_dominance,80.79494799405647
