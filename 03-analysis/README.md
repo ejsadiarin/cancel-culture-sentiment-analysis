@@ -2,12 +2,30 @@
 
 This module contains modeling, sentiment analysis, and network analysis workflows.
 
-## Module-local uv environment
+## Notebooks
+
+- `03-analysis/notebooks/02_social_network_analysis.ipynb` - Social network analysis
+- `03-analysis/notebooks/04_sentiment_analysis.ipynb` - Sentiment trajectory analysis
+
+## Environment
+
+This project uses a central venv at the repository root.
+
+### First-time setup
 
 ```bash
-uv venv 03-analysis/.venv
-uv sync --directory 03-analysis
-uv run --directory 03-analysis python -V
+# Create venv and install dependencies
+uv venv
+uv sync
+
+# Register Jupyter kernel
+.venv/bin/python -m ipykernel install --user --name="cancel-culture" --display-name="Cancel Culture"
 ```
 
-Keep dependencies for analysis in `03-analysis/pyproject.toml` so only this stage installs them.
+### Running notebooks
+
+```bash
+jupyter notebook
+```
+
+Select "Cancel Culture" kernel in Jupyter.

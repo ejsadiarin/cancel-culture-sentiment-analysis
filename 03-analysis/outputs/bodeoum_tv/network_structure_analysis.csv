@@ -1,0 +1,14 @@
+metric,value
+edge_amplification,5.969805323798172
+density_amplification,0.24310282329508764
+node_amplification,4.954945347907225
+gini_amplification,0.9998994439884399
+pre_modularity,0.818186585515868
+cancel_modularity,0.7716112969862288
+post_modularity,0.9186128039654746
+pre_cascade_depth,17.0
+cancel_cascade_depth,24.0
+post_cascade_depth,12.0
+pre_num_communities,356.0
+cancel_num_communities,970.0
+post_num_communities,168.0

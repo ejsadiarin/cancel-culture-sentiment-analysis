@@ -1,0 +1,14 @@
+metric,value
+pre_mean,0.7800058
+cancel_mean,0.80410117
+post_mean,0.8111323
+nadir_slot,pre-3
+nadir_value,0.7576883
+nadir_window,pre
+recovery_slot,post-1
+recovery_achieved,True
+slots_to_recovery,1
+pct_change_cancel_vs_pre,3.0891252
+pct_change_post_vs_pre,3.990547
+recovery_threshold,0.9
+consecutive_slots_required,3

@@ -1,0 +1,30 @@
+[project]
+name = "cancel-culture-sentiment-analysis"
+version = "0.1.0"
+description = "Cancel culture sentiment analysis pipeline"
+requires-python = ">=3.10"
+dependencies = [
+    "yt-dlp>=2024.10.7",
+    "faster-whisper>=1.1.0",
+    "tqdm>=4.66.0",
+    "pandas>=2.2.2",
+    "numpy>=1.26.4",
+    "python-dateutil>=2.9.0.post0",
+    "nbconvert>=7.16.4",
+    "ipykernel>=6.29.5",
+    "kss>=3.0.1",
+    "networkx>=3.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+    "scipy>=1.10",
+    "transformers>=4.30",
+    "torch>=2.0",
+    "jupyter",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

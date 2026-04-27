@@ -24,7 +24,7 @@ Per influencer under `02-preprocessing/outputs/<person>/`:
 - `edges.csv` (reply graph edges)
 - `transcripts.csv` (slot/window + transcript text)
 
-## Notebook (single task)
+## Notebook
 
 The preprocessing task is captured in a single notebook:
 
@@ -33,20 +33,31 @@ The preprocessing task is captured in a single notebook:
 This notebook loads raw inputs from `data/`, builds the output tables, and saves them into
 `02-preprocessing/outputs/`.
 
-## Module-local uv environment
+## Environment
+
+This project uses a central venv at the repository root.
+
+### First-time setup
 
 ```bash
-uv venv 02-preprocessing/.venv
-uv sync --directory 02-preprocessing
-uv run --directory 02-preprocessing python -V
+# Create venv and install dependencies
+uv venv
+uv sync
+
+# Register Jupyter kernel
+.venv/bin/python -m ipykernel install --user --name="cancel-culture" --display-name="Cancel Culture"
 ```
 
-Keep dependencies for preprocessing in `02-preprocessing/pyproject.toml` so they do not affect other stages.
-
-## CLI
-
-Run the notebook via the module CLI:
+### Running notebooks
 
 ```bash
-uv run --directory 02-preprocessing preprocessing
+jupyter notebook
+```
+
+Select "Cancel Culture" kernel in Jupyter.
+
+### CLI usage
+
+```bash
+uv run python -m preprocessing
 ```
