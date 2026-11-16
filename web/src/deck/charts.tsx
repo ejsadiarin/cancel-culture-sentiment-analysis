@@ -25,8 +25,8 @@ function lineColor(caseData: CaseStudy) {
 /* ------------------------------------------------------------------ */
 
 const T_WIDTH = 620;
-const T_HEIGHT = 300;
-const T_M = { top: 34, right: 16, bottom: 32, left: 38 };
+const T_HEIGHT = 320;
+const T_M = { top: 38, right: 18, bottom: 48, left: 56 };
 const T_INNER_W = T_WIDTH - T_M.left - T_M.right;
 const T_INNER_H = T_HEIGHT - T_M.top - T_M.bottom;
 const T_Y_MIN = 0.73;
@@ -54,7 +54,7 @@ export function TrajectoryChart({
     otherCase.slots.map((slot, index) => ({ x: xFor(index), y: yFor(slot.sentiment) })),
   );
   const ticks = [0.75, 0.8, 0.85, 0.9];
-  const xLabels = [0, 4, 9, 10, 11, 15, 20];
+  const xLabels = [0, 5, 10, 15, 20];
 
   return (
     <svg
@@ -122,7 +122,15 @@ export function TrajectoryChart({
       />
 
       <path d={ghost} className="trajectory-ghost" />
-      <path d={line} fill="none" stroke={lineColor(caseData)} strokeWidth="2.4" strokeLinecap="round" />
+      <path
+        d={line}
+        className="trajectory-line"
+        pathLength={1}
+        fill="none"
+        stroke={lineColor(caseData)}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
 
       {slots.map((slot, index) => (
         <g
@@ -147,7 +155,7 @@ export function TrajectoryChart({
             stroke={index === selected ? "#f8f4eb" : "transparent"}
             strokeWidth={index === selected ? 2 : 0}
           />
-          <circle cx={xFor(index)} cy={yFor(slot.sentiment)} r="12" fill="transparent" />
+          <circle cx={xFor(index)} cy={yFor(slot.sentiment)} r="18" fill="transparent" />
           <title>
             {slotLabel(slot.slot)} · {slot.sentiment.toFixed(3)} · {slot.n.toLocaleString()} comments
           </title>
@@ -189,7 +197,7 @@ export function TrajectoryChart({
 /* ------------------------------------------------------------------ */
 
 const G_WIDTH = 620;
-const G_HEIGHT = 292;
+const G_HEIGHT = 400;
 
 export function ThreadDiagram({
   thread,
@@ -212,9 +220,9 @@ export function ThreadDiagram({
   const positions = new Map<string, { x: number; y: number }>();
   for (let depth = 0; depth <= depthCount; depth += 1) {
     const nodes = byDepth.get(depth) ?? [];
-    const x = 72 + (depth / depthCount) * (G_WIDTH - 144);
+    const x = 76 + (depth / depthCount) * (G_WIDTH - 152);
     nodes.forEach((node, index) => {
-      const y = 54 + ((index + 1) / (nodes.length + 1)) * (G_HEIGHT - 108);
+      const y = 58 + ((index + 1) / (nodes.length + 1)) * (G_HEIGHT - 116);
       positions.set(node.id, { x, y });
     });
   }
@@ -226,7 +234,7 @@ export function ThreadDiagram({
 
   return (
     <svg
-      className="chart-svg"
+      className="chart-svg chart-svg--thread"
       viewBox={`0 0 ${G_WIDTH} ${G_HEIGHT}`}
       role="img"
       aria-label={`Reply graph with ${thread.nodeCount} comments and ${thread.edges.length} reply links.`}
@@ -244,10 +252,12 @@ export function ThreadDiagram({
         return (
           <path
             key={`${edge.source}-${edge.target}`}
+            className="thread-edge"
+            pathLength={1}
             d={`M ${source.x} ${source.y} Q ${(source.x + target.x) / 2} ${(source.y + target.y) / 2 - 34} ${target.x} ${target.y}`}
             fill="none"
             stroke="#958c7d"
-            strokeWidth="1.2"
+            strokeWidth="1.4"
             markerEnd={`url(#${markerId})`}
             opacity="0.75"
           />
@@ -282,7 +292,7 @@ export function ThreadDiagram({
             <circle
               cx={position.x}
               cy={position.y}
-              r={selected ? 21 : 17}
+              r={selected ? 25 : 21}
               fill={color}
               opacity={selected ? 1 : 0.82}
               stroke={selected ? "#171512" : "transparent"}
@@ -291,8 +301,8 @@ export function ThreadDiagram({
             <text x={position.x} y={position.y + 4} textAnchor="middle" className="thread-node__index">
               {index + 1}
             </text>
-            <text x={position.x} y={position.y + 36} textAnchor="middle" className="thread-node__handle">
-              {node.handle.length > 15 ? `${node.handle.slice(0, 14)}…` : node.handle}
+            <text x={position.x} y={position.y + 42} textAnchor="middle" className="thread-node__handle">
+              {node.handle.length > 12 ? `${node.handle.slice(0, 11)}…` : node.handle}
             </text>
             <title>
               {node.handle} · in-degree {inDegree.get(node.id) ?? 0} · {node.sentiment}
@@ -301,15 +311,15 @@ export function ThreadDiagram({
         );
       })}
 
-      <text x="72" y={G_HEIGHT - 10} textAnchor="middle" className="chart-label">
+      <text x="76" y={G_HEIGHT - 10} textAnchor="middle" className="chart-label thread-caption">
         starts thread
       </text>
-      <text x={72 + (G_WIDTH - 144) / 2} y={G_HEIGHT - 10} textAnchor="middle" className="chart-label">
+      <text x={76 + (G_WIDTH - 152) / 2} y={G_HEIGHT - 10} textAnchor="middle" className="chart-label thread-caption">
         reply
       </text>
       {depthCount > 1 ? (
-        <text x={G_WIDTH - 72} y={G_HEIGHT - 10} textAnchor="middle" className="chart-label">
-          reply to reply
+        <text x={G_WIDTH - 76} y={G_HEIGHT - 10} textAnchor="middle" className="chart-label thread-caption">
+          reply again
         </text>
       ) : null}
     </svg>
@@ -338,8 +348,8 @@ function metricValue(slot: Slot, key: string): number {
 }
 
 const S_WIDTH = 620;
-const S_HEIGHT = 300;
-const S_M = { top: 24, right: 20, bottom: 58, left: 48 };
+const S_HEIGHT = 310;
+const S_M = { top: 30, right: 22, bottom: 62, left: 58 };
 const S_INNER_W = S_WIDTH - S_M.left - S_M.right;
 const S_INNER_H = S_HEIGHT - S_M.top - S_M.bottom;
 const S_Y_MIN = 0.73;
@@ -425,6 +435,7 @@ export function CorrelationScatter({
       <path
         d={`M ${xFor(xMin)} ${yFor(clamp(intercept + slope * xMin, S_Y_MIN, S_Y_MAX))} L ${xFor(xMax)} ${yFor(clamp(intercept + slope * xMax, S_Y_MIN, S_Y_MAX))}`}
         className="scatter-fit"
+        pathLength={1}
       />
 
       {ghost.map((point) => (
@@ -432,7 +443,7 @@ export function CorrelationScatter({
           key={`ghost-${point.slot.slot}`}
           cx={xFor(point.x)}
           cy={yFor(point.y)}
-          r="2.7"
+          r="3"
           className="scatter-ghost"
         />
       ))}
@@ -442,7 +453,7 @@ export function CorrelationScatter({
           key={point.slot.slot}
           cx={xFor(point.x)}
           cy={yFor(point.y)}
-          r="4.2"
+          r="5"
           fill={WINDOW_COLOR[point.slot.window]}
           stroke="#f8f4eb"
           strokeWidth="1.2"

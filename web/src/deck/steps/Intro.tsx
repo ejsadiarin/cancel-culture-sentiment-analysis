@@ -11,7 +11,8 @@ export function IntroStep() {
       <div className="step-copy intro-copy">
         <p className="kicker">FMLDS 2026 · step by step</p>
         <h1 tabIndex={-1}>
-          The Dynamics of <em>Cancel Culture</em>:
+          The Dynamics of <em>Cancel Culture</em>
+          <span className="paper-title-colon">:</span>
           <span className="paper-title-sub">
             A Social Network and Sentiment Analysis of Influencer Apology Videos in South Korea
           </span>
@@ -37,9 +38,6 @@ export function IntroStep() {
           </div>
         </div>
 
-        <a className="text-link" href={data.meta.paper} target="_blank" rel="noreferrer">
-          Read the paper ↗
-        </a>
       </div>
 
       <aside className="intro-panel">

@@ -1,5 +1,4 @@
 import { useCase } from "../../context/CaseContext";
-import { fmtSignedPct } from "../../lib/format";
 import { StepCopy } from "../parts";
 
 export function FindingsStep() {
@@ -23,9 +22,9 @@ export function FindingsStep() {
             <span>01</span>
             <h3>The apology is not always the bottom.</h3>
             <p>
-              At the apology, Bodeoum moves {fmtSignedPct(bodeoum.recovery.pctCancelVsPre)}; by the
-              after window it is {fmtSignedPct(bodeoum.recovery.pctPostVsPre)} above before.
-              Mimiminu barely moves.
+              Bodeoum drops {Math.abs(bodeoum.recovery.pctCancelVsPre).toFixed(1)}% at the
+              apology, then ends {Math.abs(bodeoum.recovery.pctPostVsPre).toFixed(1)}% above
+              before. Mimiminu barely moves.
             </p>
           </div>
           <div className="finding">
@@ -60,14 +59,6 @@ export function FindingsStep() {
           </li>
         </ul>
 
-        <div className="actions actions--wrap">
-          <a className="deck-btn deck-btn--ghost" href={data.meta.paper} target="_blank" rel="noreferrer">
-            Paper ↗
-          </a>
-          <a className="deck-btn deck-btn--ghost" href={data.meta.slides} target="_blank" rel="noreferrer">
-            Slides ↗
-          </a>
-        </div>
       </aside>
     </section>
   );

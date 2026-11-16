@@ -26,7 +26,7 @@ export function DesignStep() {
       <Viz
         title="The 21-video design"
         meta={`${caseData.windows.pre.days} days before · ${caseData.windows.post.days} after`}
-        foot="Tap a video to inspect it."
+        foot="Tap a bar to inspect the video."
       >
         <div className="slot-strip" role="group" aria-label="Video slots">
           {caseData.slots.map((item, index) => (
@@ -38,7 +38,13 @@ export function DesignStep() {
               aria-pressed={index === selected}
               title={`${slotShort(item.slot)} · ${item.title}`}
             >
-              <span className="slot-cell__bar" style={{ height: `${Math.max(12, (item.sentiment - 0.74) * 520)}%` }} />
+              <span
+                className="slot-cell__bar"
+                style={{
+                  height: `${Math.max(12, (item.sentiment - 0.74) * 520)}%`,
+                  animationDelay: `${index * 14}ms`,
+                }}
+              />
               <span className="slot-cell__label">{slotShort(item.slot)}</span>
             </button>
           ))}

@@ -74,7 +74,7 @@ export function SentimentStep() {
           ))}
         </div>
 
-        <div className="comment-card">
+        <div className="comment-card" key={`${example.text}-${exampleIndex}`}>
           <p className="comment-card__ko">{example.text}</p>
           <p className="comment-card__en">“{example.translation}”</p>
           <div className="comment-card__meta">
