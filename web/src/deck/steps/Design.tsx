@@ -57,9 +57,7 @@ export function DesignStep() {
             <span className="slot-detail__n">{fmtInt(slot.n)} comments</span>
           </div>
           <h3>{slot.title}</h3>
-          {slot.window === "cancel" ? (
-            <p className="slot-detail__translation">“{caseData.apologyTitleEn}”</p>
-          ) : null}
+          <p className="slot-detail__translation">{slot.titleEn}</p>
           <div className="slot-detail__stats">
             <span>
               mean <strong>{fmtDecimal(slot.sentiment)}</strong>

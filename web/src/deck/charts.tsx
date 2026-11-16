@@ -178,7 +178,7 @@ export function TrajectoryChart({
             textAnchor="middle"
             className="chart-nadir"
           >
-            nadir {slotShort(slots[nadirIndex].slot)}
+            lowest · {slotShort(slots[nadirIndex].slot)}
           </text>
         </g>
       ) : null}
@@ -197,7 +197,7 @@ export function TrajectoryChart({
 /* ------------------------------------------------------------------ */
 
 const G_WIDTH = 620;
-const G_HEIGHT = 400;
+const G_HEIGHT = 460;
 
 export function ThreadDiagram({
   thread,

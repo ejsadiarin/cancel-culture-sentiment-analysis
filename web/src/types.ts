@@ -22,6 +22,7 @@ export interface Slot {
   number: number;
   videoId: string;
   title: string;
+  titleEn: string;
   date: string;
   views: number;
   likes: number;

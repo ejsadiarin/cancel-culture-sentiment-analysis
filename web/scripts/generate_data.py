@@ -106,6 +106,55 @@ CASE_META = {
     },
 }
 
+TITLE_TRANSLATIONS = {
+    "bodeoum_tv": {
+        "pre-10": "The breed even Kang Hyung-wook finds hard to raise (not for beginners) · Malinois",
+        "pre-9": "Training two Shiba Inus with double the cuteness · Puppy Training",
+        "pre-8": "Celebrity sisters TWICE’s Jeongyeon and Gong Seung-yeon come to brag about their dogs · Guest Show EP.27",
+        "pre-7": "So cute it gives you a nosebleed (the editor’s third) · Bernese Mountain Dog",
+        "pre-6": "This puppy is mine now: the pretty puppy Kang Hyung-wook fell for · Puppy Training",
+        "pre-5": "Uhm Jung-hwa, how did you raise them? Kang Hyung-wook falls for a Jindo · Guest Show EP.28",
+        "pre-4": "The breed that traumatized Kang Hyung-wook · Wire Fox Terrier",
+        "pre-3": "How a rescue dog learns to go for a walk · Let’s Go Home EP.7",
+        "pre-2": "The dog whose tongue turns purple when it bleats · Chow Chow",
+        "pre-1": "A small dog freezes in front of a big dog... (the big dog is Kang Hyung-wook) · Puppy Training",
+        "cancel-1": "I’m sorry it took so long.",
+        "post-1": "A bright-eyed dog I haven’t seen in a while · Puppy Training",
+        "post-2": "“Shoo, devil” — the Doberman that needs early training · Doberman Pinscher",
+        "post-3": "Hae-on showing off her flower-like beauty · Let’s Go Home EP.8",
+        "post-4": "Why Spitzes are such sensitive bosses · Spitz",
+        "post-5": "Training a happy-go-lucky dog that walks with a bounce · Puppy Training",
+        "post-6": "Looking for the ball the entire video · Bedlington Terrier",
+        "post-7": "10-year-old Hodong, who was quite a handful back in the day · Let’s Go Home EP.9",
+        "post-8": "You’ve got chocolate on your mouth. I fell for the cute Choco. · Puppy Training",
+        "post-9": "The “that dog” everyone has seen at least once at the mart · West Highland White Terrier",
+        "post-10": "“I’m scared of plastic bags” — training a fearful puppy · Puppy Training",
+    },
+    "mimiminu": {
+        "pre-10": "“TEAM08, are you ready?” Meeting ILLIT on the set of a Megapass ad for the 2027 CSAT",
+        "pre-9": "[5BS] Kim Min-woo — Farewellcome 2026 ver.",
+        "pre-8": "“How can I watch the Worlds final four days before the CSAT?” Congratulations to T1 on the three-peat",
+        "pre-7": "“Students came up and asked for photos” — Health Study 3 students share their 2026 CSAT stories",
+        "pre-6": "“29 in Korean History? 79 in English? Ha...” Health Study 3 students’ 2026 CSAT grading livestream",
+        "pre-5": "“Why is reading so much harder than in mock exams?” Reviewing the brutal 2026 CSAT Korean section",
+        "pre-4": "“No killer questions? Forget it—the killers are back.” Reviewing the 2026 CSAT math section",
+        "pre-3": "“I trusted the guessing lecture and bombed” — reviewing the cruel 2026 CSAT English section",
+        "pre-2": "“Gachon University hosts a waterbomb” — grading college students’ GPAs at Gachon · GPA Reader EP.27",
+        "pre-1": "“Do you snoop on students’ Instagram?” Teachers from Seoul National, Korea, and Yonsei universities compete",
+        "cancel-1": "I’m sorry for the Part-time Study bankruptcy and delayed deposit refunds.",
+        "post-1": "“TEAM08, are you really ready now?” Analyzing the 2027 CSAT online-course passes",
+        "post-2": "“The calculus challenge from a foreigner!” How good are Hyundai researchers at math? · Street Math Challenge EP.15",
+        "post-3": "“Are you really doing this in front of the CEO..?” Final pitch at Board Game Cafe Red Button HQ · Mimimi Life EP.28",
+        "post-4": "“Sophomore fall is where your school record is won” — a freshman worried about her record after quitting sports · All About Admissions EP.104",
+        "post-5": "“High-school math and university math are completely different” · Department Profiles 14: Mathematics",
+        "post-6": "“I have no plans to lecture in the private online-course market” — EBS Korean instructor Yun Hye-jeong joins",
+        "post-7": "“Success and happiness are separate questions” — Yoon Do-young’s sharp advice on admissions and life · All About Admissions EP.105",
+        "post-8": "[CSAT Math Roundtable] “If the exam changes, instructors work less” with Kim Seong-eun, Jeong Byeong-ho, Kang Yun-gu, and Math Rangu",
+        "post-9": "“People keep giving birth to me (?)” — a Yonsei law graduate YouTuber who opened the new-media era · New Number’s God EP.74",
+        "post-10": "“There’s no telling when the regular admissions cycle ends” — a sophomore hoping for regular admissions · All About Admissions EP.106",
+    },
+}
+
 THREAD_TRANSLATIONS = {
     # Bodeoum — a star-shaped argument about the surveillance allegations.
     "Ugwo3w6aE2-s1kqFXHN4AaABAg": (
@@ -357,6 +406,7 @@ def main() -> None:
                     "number": number,
                     "videoId": video["video_id"],
                     "title": video["title"],
+                    "titleEn": TITLE_TRANSLATIONS[case][slot],
                     "date": video["create_time"][:10],
                     "views": int(video["view_count"]),
                     "likes": int(video["like_count"]),

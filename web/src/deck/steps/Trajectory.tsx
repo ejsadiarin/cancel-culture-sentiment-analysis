@@ -69,6 +69,7 @@ export function TrajectoryStep() {
             <strong>mean {fmtDecimal(slot.sentiment)}</strong>
           </div>
           <p className="trajectory-detail__title">{slot.title}</p>
+          <p className="trajectory-detail__translation">{slot.titleEn}</p>
           <div className="trajectory-detail__stats">
             <span>
               positive <strong>{slot.pos.toFixed(1)}%</strong>
