@@ -164,22 +164,18 @@ export function TrajectoryChart({
 
       {nadirIndex >= 0 ? (
         <g>
-          <line
-            x1={xFor(nadirIndex)}
-            x2={xFor(nadirIndex)}
-            y1={yFor(slots[nadirIndex].sentiment) - 8}
-            y2={yFor(slots[nadirIndex].sentiment) + 13}
+          <circle
+            cx={xFor(nadirIndex)}
+            cy={yFor(slots[nadirIndex].sentiment)}
+            r="7.5"
+            fill="none"
             stroke="#b28a45"
-            strokeWidth="1.4"
+            strokeWidth="1.6"
           />
-          <text
-            x={xFor(nadirIndex)}
-            y={yFor(slots[nadirIndex].sentiment) - 13}
-            textAnchor="middle"
-            className="chart-nadir"
-          >
-            lowest · {slotShort(slots[nadirIndex].slot)}
-          </text>
+          <title>
+            Lowest: {slotLabel(slots[nadirIndex].slot)} ·{" "}
+            {slots[nadirIndex].sentiment.toFixed(3)}
+          </title>
         </g>
       ) : null}
 
