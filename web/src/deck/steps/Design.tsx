@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
-import { fmtDate, fmtDecimal, fmtInt, slotShort } from "../../lib/format";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { fmtDate, fmtDecimal, fmtInt, slotLabel, slotShort } from "../../lib/format";
+import { StepCopy, Viz } from "../parts";
 
 export function DesignStep() {
   const { caseData } = useCase();
@@ -14,36 +14,19 @@ export function DesignStep() {
     <section className="step">
       <StepCopy
         number="01"
-        label="Design"
+        label="Setup"
         title={
           <>
-            Put the apology at the <em>center.</em>
+            The apology is the <em>center.</em>
           </>
         }
-        lede="Each case is cut into 21 video slots: ten uploads before the apology, the apology itself, and the next ten uploads. Every later metric uses that same grid."
-      >
-        <div className="points points--two">
-          <Point label="10 + 1 + 10">Fixed slot count, not fixed elapsed time.</Point>
-          <Point label="Event-relative">Windows follow the uploads around the trigger.</Point>
-          <Point label="Eligibility">A discrete trigger, an apology video, ≥1,000 comments.</Point>
-          <Point label="Unit">One video slot; comments aggregate upward.</Point>
-        </div>
-
-        <Callout>
-          The spans differ: Bodeoum covers {caseData.windows.pre.days} pre days and{" "}
-          {caseData.windows.post.days} post days; Mimiminu covers 12 and 17. Fixed slots do not
-          control for calendar time.
-        </Callout>
-      </StepCopy>
+        lede="Each case is 21 videos: ten before the apology, the apology, ten after."
+      />
 
       <Viz
-        title="The 21-slot design"
-        meta={`${fmtInt(caseData.analyzed)} comments`}
-        foot={
-          <span>
-            Click any slot. {caseData.slots[0].window === "pre" ? "P10 is the earliest upload; P1 is closest to the apology." : ""}
-          </span>
-        }
+        title="The 21-video design"
+        meta={`${caseData.windows.pre.days} days before · ${caseData.windows.post.days} after`}
+        foot="Tap a video to inspect it."
       >
         <div className="slot-strip" role="group" aria-label="Video slots">
           {caseData.slots.map((item, index) => (
@@ -63,7 +46,7 @@ export function DesignStep() {
 
         <div className="slot-detail">
           <div className="slot-detail__top">
-            <span className={`slot-badge slot-badge--${slot.window}`}>{slotShort(slot.slot)}</span>
+            <span className={`slot-badge slot-badge--${slot.window}`}>{slotLabel(slot.slot)}</span>
             <span className="slot-detail__date">{fmtDate(slot.date)}</span>
             <span className="slot-detail__n">{fmtInt(slot.n)} comments</span>
           </div>

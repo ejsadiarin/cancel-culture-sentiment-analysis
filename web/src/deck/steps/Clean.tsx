@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
 import { fmtInt } from "../../lib/format";
-import { Point, StepCopy, Viz } from "../parts";
+import { StepCopy, Viz } from "../parts";
 
 type Tab = "clean" | "dedup";
 
@@ -25,17 +25,11 @@ export function CleanStep() {
         label="Clean"
         title={
           <>
-            Remove noise. Keep the <em>signal.</em>
+            Clean the <em>text.</em>
           </>
         }
-        lede="Regex strips zero-width characters, HTML entities, and URLs. A character whitelist keeps Hangul, punctuation, and emoji. Exact repeats from the same author within 60 seconds are dropped."
+        lede="Strip links and empty comments. Drop exact repeats from the same author within 60 seconds."
       >
-        <div className="points">
-          <Point label="Text">Zero-width, HTML, URLs → whitelist → whitespace.</Point>
-          <Point label="Spacing">Korean sentence spacing is normalized after tokenization.</Point>
-          <Point label="Dedup">Same author + same cleaned text + 60 seconds = one comment.</Point>
-        </div>
-
         <div className="funnel" aria-label="Comment cleaning counts">
           <div>
             <strong>{fmtInt(data.meta.raw)}</strong>

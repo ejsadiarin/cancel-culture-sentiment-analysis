@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
 import { fmtP, fmtR } from "../../lib/format";
 import { CorrelationScatter } from "../charts";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { StepCopy, Viz } from "../parts";
 
 const METRICS = ["in_degree_mean", "cascade_depth", "density", "modularity"] as const;
 
@@ -28,40 +28,24 @@ export function CorrelationStep() {
     data.evaluation.pearson[0];
   const stats = metric[caseData.id];
   const otherStats = metric[otherCase.id];
-  const inDegree = data.evaluation.pearson.find((item) => item.key === "in_degree_mean")!;
 
   return (
     <section className="step step--correlation">
       <StepCopy
         number="09"
-        label="Correlation"
+        label="Link"
         title={
           <>
-            Does the shape of conversation travel with its <em>mood?</em>
+            Do shape and mood move <em>together?</em>
           </>
         }
-        lede="Pearson correlation is computed across the 21 video slots. Each dot is one upload, not one comment, so this is an ecological association between graph structure and mean sentiment."
-      >
-        <div className="points">
-          <Point label="21 dots">One dot per video slot; sentiment is the same slot mean as the trajectory.</Point>
-          <Point label="Mean in-degree">
-            {fmtR(inDegree.bodeoum_tv.r)} (Bodeoum) and {fmtR(inDegree.mimiminu.r)} (Mimiminu).
-            More concentrated replies, lower sentiment.
-          </Point>
-          <Point label="Density">Significant for Mimiminu, not for Bodeoum. Direction is not universal.</Point>
-          <Point label="Modularity">Not significant in either case; not every network metric moves with mood.</Point>
-        </div>
-
-        <Callout>
-          Correlation across slots, not causation: a third factor, such as audience size or age,
-          could move both.
-        </Callout>
-      </StepCopy>
+        lede="Each dot is one video. In both cases, more concentrated replies go with lower mood."
+      />
 
       <Viz
-        title={`${metric.label} vs. mean sentiment`}
-        meta={`${caseData.name} · 21 video slots`}
-        foot="Filled dots: selected case, coloured by window. Hollow dots: the other case. Line: least-squares fit."
+        title={`${metric.label} vs. mood`}
+        meta={`${caseData.name} · 21 videos`}
+        foot="Filled: selected case. Hollow: other case. Association, not causation."
       >
         <div className="metric-pills" role="group" aria-label="Choose a network metric">
           {METRICS.map((key) => {

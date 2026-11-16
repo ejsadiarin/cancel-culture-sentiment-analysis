@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
 import { fmtCompact } from "../../lib/format";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { StepCopy, Viz } from "../parts";
 
 type Tab = "csv" | "comment" | "transcript";
 
@@ -39,27 +39,16 @@ export function CollectStep() {
         label="Collect"
         title={
           <>
-            Collect the comments—and the <em>reply pointers.</em>
+            Collect the <em>comments.</em>
           </>
         }
-        lede="A manual CSV names each video and its window. The scraper stores metadata, every comment, and the parent/root IDs that let the analysis reconstruct who replied to whom."
-      >
-        <div className="points">
-          <Point label="CSV → scrape">42 videos; each case needs at least 1,000 comments.</Point>
-          <Point label="JSONL + JSON">Video metadata plus comments and replies, with parent/root preserved.</Point>
-          <Point label="Transcripts">Whisper runs on the two apology videos; the paper does not analyze their content.</Point>
-        </div>
-
-        <Callout>
-          Collection is one snapshot ({data.meta.scrape}). Later windows are video groups, not a
-          live audience timeline.
-        </Callout>
-      </StepCopy>
+        lede="A simple list names the videos. The scraper saves each comment and the reply links between them."
+      />
 
       <Viz
         title="What the scraper stores"
-        meta={`${fmtCompact(caseData.raw)} raw comments`}
-        foot="The parent/root pointers are why a comment dataset can become a network."
+        meta={`${fmtCompact(caseData.raw)} comments · ${data.meta.scrape}`}
+        foot="One scrape. The windows are video groups, not a live timeline."
       >
         <div className="segmented" role="tablist" aria-label="Collection artifacts">
           {(

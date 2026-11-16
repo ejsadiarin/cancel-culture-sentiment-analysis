@@ -1,6 +1,6 @@
 import { useCase } from "../../context/CaseContext";
 import { fmtDensity, fmtInt } from "../../lib/format";
-import { Point, StepCopy, Viz } from "../parts";
+import { StepCopy, Viz } from "../parts";
 
 const WINDOWS = ["pre", "cancel", "post"] as const;
 
@@ -39,27 +39,19 @@ export function MetricsStep() {
     <section className="step">
       <StepCopy
         number="07"
-        label="Structure"
+        label="Shape"
         title={
           <>
-            Size is not the same as <em>shape.</em>
+            Size is not <em>shape.</em>
           </>
         }
-        lede="Raw node and edge counts rise with turnout. Density, modularity, cascade depth, and Gini describe how the conversation is arranged, so structure is compared within a case rather than across cases."
-      >
-        <div className="points">
-          <Point label="Density">Existing directed edges ÷ all possible directed edges.</Point>
-          <Point label="Modularity">Louvain communities at resolution 1.0, seed 42.</Point>
-          <Point label="Cascade">The longest reply-to-reply chain in the window.</Point>
-          <Point label="Concentration">Gini and hub dominance track how much attention one author absorbs.</Point>
-        </div>
-
-      </StepCopy>
+        lede="Bodeoum's apology expands and fragments. Mimiminu's shrinks but gets denser."
+      />
 
       <Viz
-        title="Window by window, same case"
-        meta={`${caseData.name} · apology ÷ before`}
-        foot="Amplification compares the apology window with the ten-video baseline. Raw counts scale with turnout; density and modularity describe structure."
+        title="Window by window"
+        meta={`${caseData.name} · apology vs. before`}
+        foot="Raw counts follow turnout. Density and modularity describe the shape."
       >
         <p className="topology-note">
           <strong>{topology.title}</strong> {topology.text}

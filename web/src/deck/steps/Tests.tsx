@@ -1,6 +1,6 @@
 import { useCase } from "../../context/CaseContext";
 import { WINDOW_LABEL } from "../../lib/format";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { Callout, StepCopy, Viz } from "../parts";
 
 const WINDOWS = ["pre", "cancel", "post"] as const;
 
@@ -19,33 +19,26 @@ export function TestsStep() {
         label="Tests"
         title={
           <>
-            Check the assumptions before the <em>claim.</em>
+            Check the test <em>first.</em>
           </>
         }
-        lede="Shapiro–Wilk finds non-normal sentiment distributions in both cases, so the pipeline uses a rank-based Kruskal–Wallis test instead of ANOVA. Dunn's post-hoc then asks which window pairs differ."
+        lede="The scores are not evenly spread, so the study uses a rank test. Dunn's test then checks each pair of windows."
       >
-        <div className="points">
-          <Point label="Shapiro–Wilk">Both cases, all windows: non-normal at p &lt; 0.001.</Point>
-          <Point label="Kruskal–Wallis">One test across before, apology, and after.</Point>
-          <Point label="Dunn + Bonferroni">Pairwise comparisons with a multiple-test correction.</Point>
-        </div>
-
         <Callout>
           {caseData.id === "bodeoum_tv"
-            ? "Bodeoum separates every pair at p < 0.001: before, apology, and after all differ."
-            : "Mimiminu separates before from both later windows, but apology and after are statistically indistinguishable (p = 1.000)."}
+            ? "Bodeoum: all three windows differ (p < 0.001)."
+            : "Mimiminu: before differs from both later windows; apology and after do not (p = 1.000)."}
         </Callout>
 
         <p className="unit-check">
-          Unit check: these tests use <b>comment-level</b> scores. The correlation step uses the{" "}
-          <b>21 slot-level means</b>; mixing the units would inflate significance.
+          Tests use comments. The next step uses 21 video averages.
         </p>
       </StepCopy>
 
       <Viz
-        title="Dunn pairwise matrix"
-        meta={`${caseData.short} · comment-level scores`}
-        foot="Cells show Bonferroni-adjusted p-values. The matrix is symmetric; the diagonal compares a window with itself."
+        title="Which windows differ?"
+        meta={`${caseData.short} · adjusted p`}
+        foot="Lower p means a clearer difference."
       >
         <div className="kw-stat">
           <span>Kruskal–Wallis</span>
@@ -90,10 +83,7 @@ export function TestsStep() {
           </tbody>
         </table>
 
-        <p className="dunn__note">
-          Significant cells mark a difference in the tested distribution. Significance is not an
-          effect size, and it does not establish causation.
-        </p>
+        <p className="dunn__note">A difference is not proof of cause.</p>
       </Viz>
     </section>
   );

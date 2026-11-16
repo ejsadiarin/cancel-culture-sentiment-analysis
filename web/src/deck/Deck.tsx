@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CaseKey } from "../types";
 import { useCase } from "../context/CaseContext";
-import { fmtCompact } from "../lib/format";
 import { IntroStep } from "./steps/Intro";
 import { DesignStep } from "./steps/Design";
 import { CollectStep } from "./steps/Collect";
@@ -29,17 +28,17 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { id: "start", label: "Start", render: (nav) => <IntroStep onNext={nav.next} /> },
-  { id: "design", label: "Design", render: () => <DesignStep /> },
+  { id: "start", label: "Start", render: () => <IntroStep /> },
+  { id: "design", label: "Setup", render: () => <DesignStep /> },
   { id: "collect", label: "Collect", render: () => <CollectStep /> },
   { id: "clean", label: "Clean", render: () => <CleanStep /> },
-  { id: "sentiment", label: "Sentiment", render: () => <SentimentStep /> },
-  { id: "trajectory", label: "Trajectory", render: () => <TrajectoryStep /> },
-  { id: "network", label: "Network", render: () => <NetworkStep /> },
-  { id: "metrics", label: "Structure", render: () => <MetricsStep /> },
+  { id: "sentiment", label: "Mood", render: () => <SentimentStep /> },
+  { id: "trajectory", label: "Over time", render: () => <TrajectoryStep /> },
+  { id: "network", label: "Replies", render: () => <NetworkStep /> },
+  { id: "metrics", label: "Shape", render: () => <MetricsStep /> },
   { id: "tests", label: "Tests", render: () => <TestsStep /> },
-  { id: "correlation", label: "Correlation", render: () => <CorrelationStep /> },
-  { id: "findings", label: "Findings", render: (nav) => <FindingsStep onRestart={nav.restart} /> },
+  { id: "correlation", label: "Link", render: () => <CorrelationStep /> },
+  { id: "findings", label: "Findings", render: () => <FindingsStep /> },
 ];
 
 const CONTENT_STEPS = STEPS.slice(1);
@@ -50,7 +49,7 @@ export function Deck() {
   const [index, setIndex] = useState(0);
   const stageRef = useRef<HTMLElement>(null);
   const step = STEPS[index];
-  const contentIndex = Math.max(0, index - 1);
+  const contentIndex = index;
   const isLast = index === LAST;
 
   const next = () => setIndex((current) => Math.min(current + 1, LAST));
@@ -93,37 +92,10 @@ export function Deck() {
 
   return (
     <div className="deck">
-      <header className="deck-header">
-        <button type="button" className="brand" onClick={restart} aria-label="Back to the start">
-          <span className="brand__mark" aria-hidden="true" />
-          <span className="brand__name">Anatomy of a Cancellation</span>
-          <span className="brand__sub">methodology walkthrough</span>
-        </button>
-
-        <div className="case-switch" role="group" aria-label="Choose a case study">
-          {(["bodeoum_tv", "mimiminu"] as CaseKey[]).map((key) => {
-            const item = data.cases[key];
-            return (
-              <button
-                key={key}
-                type="button"
-                className={`case-switch__button ${caseKey === key ? "is-active" : ""}`}
-                aria-pressed={caseKey === key}
-                onClick={() => setCaseKey(key)}
-              >
-                <span className="case-switch__dot" aria-hidden="true" />
-                {item.short}
-                <span className="case-switch__count">{fmtCompact(item.analyzed)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </header>
-
       <nav className="deck-progress" aria-label="Walkthrough steps">
         {CONTENT_STEPS.map((item, itemIndex) => {
-          const active = itemIndex === contentIndex && index > 0;
-          const done = index > 0 && itemIndex < contentIndex;
+          const active = itemIndex + 1 === contentIndex;
+          const done = itemIndex + 1 < contentIndex;
           return (
             <button
               key={item.id}
@@ -151,25 +123,37 @@ export function Deck() {
       </p>
 
       <footer className="deck-footer">
-        <div className="deck-footer__meta">
-          <span>{index === 0 ? "00" : String(contentIndex).padStart(2, "0")} / 10</span>
-          <strong>{step.label}</strong>
-        </div>
-
-        <div className="deck-footer__hint" aria-hidden="true">
-          use <kbd>←</kbd> <kbd>→</kbd>
+        <div className="deck-footer__left">
+          <div className="case-switch" role="group" aria-label="Choose a case study">
+            {(["bodeoum_tv", "mimiminu"] as CaseKey[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`case-switch__button ${caseKey === key ? "is-active" : ""}`}
+                aria-pressed={caseKey === key}
+                onClick={() => setCaseKey(key)}
+              >
+                <span className="case-switch__dot" aria-hidden="true" />
+                {data.cases[key].short}
+              </button>
+            ))}
+          </div>
+          <span className="deck-footer__count">
+            {String(contentIndex).padStart(2, "0")} / 10
+            {index > 0 ? <strong>{step.label}</strong> : null}
+          </span>
         </div>
 
         <div className="deck-footer__nav">
           <button type="button" className="deck-btn deck-btn--ghost" onClick={prev} disabled={index === 0}>
-            ← Back
+            Back
           </button>
           <button
             type="button"
             className="deck-btn deck-btn--primary"
             onClick={isLast ? restart : next}
           >
-            {index === 0 ? "Begin" : isLast ? "Start over ↺" : "Next step →"}
+            {index === 0 ? "Start" : isLast ? "Restart" : "Next →"}
           </button>
         </div>
       </footer>

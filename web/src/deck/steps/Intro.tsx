@@ -2,57 +2,51 @@ import type { CaseKey } from "../../types";
 import { useCase } from "../../context/CaseContext";
 import { fmtCompact, fmtInt } from "../../lib/format";
 
-export function IntroStep({ onNext }: { onNext: () => void }) {
-  const { data, caseKey, caseData, setCaseKey } = useCase();
+export function IntroStep() {
+  const { data, caseKey, setCaseKey } = useCase();
   const cases: CaseKey[] = ["bodeoum_tv", "mimiminu"];
 
   return (
     <section className="step step--intro">
-      <div className="step-copy">
-        <p className="kicker">
-          FMLDS 2026 <span>·</span> methodology walkthrough
-        </p>
+      <div className="step-copy intro-copy">
+        <p className="kicker">FMLDS 2026 · step by step</p>
         <h1 tabIndex={-1}>
-          Anatomy of a <em>cancellation.</em>
+          The Dynamics of <em>Cancel Culture</em>:
+          <span className="paper-title-sub">
+            A Social Network and Sentiment Analysis of Influencer Apology Videos in South Korea
+          </span>
         </h1>
+
         <p className="lede">
-          Ten method decisions turn two Korean apology videos, 42 uploads, and 145,280 YouTube
-          comments into a comparable before/after study.
+          Two Korean YouTubers. Two apology videos. 145,280 comments. Follow the method one step at
+          a time.
         </p>
 
         <div className="intro-facts">
           <div>
             <strong>2</strong>
-            <span>case studies</span>
+            <span>cases</span>
           </div>
           <div>
             <strong>42</strong>
-            <span>video slots</span>
+            <span>videos</span>
           </div>
           <div>
             <strong>{fmtInt(data.meta.analyzed)}</strong>
-            <span>comments analyzed</span>
+            <span>comments</span>
           </div>
         </div>
 
-        <div className="actions">
-          <button type="button" className="deck-btn deck-btn--primary" onClick={onNext}>
-            Start the walkthrough →
-          </button>
-          <a className="text-link" href={data.meta.paper} target="_blank" rel="noreferrer">
-            Read the paper ↗
-          </a>
-        </div>
+        <a className="text-link" href={data.meta.paper} target="_blank" rel="noreferrer">
+          Read the paper ↗
+        </a>
       </div>
 
       <aside className="intro-panel">
-        <div className="intro-panel__head">
-          <span>Choose a case</span>
-          <span>same protocol</span>
-        </div>
+        <p className="intro-panel__label">Choose a case</p>
 
         <div className="case-picker">
-          {cases.map((key, itemIndex) => {
+          {cases.map((key) => {
             const item = data.cases[key];
             const active = key === caseKey;
             return (
@@ -63,12 +57,9 @@ export function IntroStep({ onNext }: { onNext: () => void }) {
                 onClick={() => setCaseKey(key)}
                 aria-pressed={active}
               >
-                <span className="case-option__index">0{itemIndex + 1}</span>
                 <span className="case-option__main">
                   <strong>{item.name}</strong>
-                  <span>
-                    {item.person} · {item.role}
-                  </span>
+                  <span>{item.person}</span>
                   <em>{item.trigger}</em>
                 </span>
                 <span className="case-option__count">{fmtCompact(item.analyzed)}</span>
@@ -77,16 +68,7 @@ export function IntroStep({ onNext }: { onNext: () => void }) {
           })}
         </div>
 
-        <div className="intro-brief">
-          <p className="intro-brief__label">Current case</p>
-          <p className="intro-brief__detail">{caseData.triggerDetail}</p>
-          <p className="intro-brief__outcome">{caseData.outcome}</p>
-        </div>
-
-        <p className="viz__foot">
-          The case switch stays available in the header. Every step recalculates from the same
-          pipeline outputs.
-        </p>
+        <p className="intro-panel__hint">Switch cases at the bottom at any time.</p>
       </aside>
     </section>
   );

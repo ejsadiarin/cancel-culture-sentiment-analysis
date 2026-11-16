@@ -1,57 +1,40 @@
 import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
-import { fmtDate, fmtDecimal, fmtInt, fmtSignedPct, slotShort } from "../../lib/format";
+import { fmtDate, fmtDecimal, fmtInt, slotLabel } from "../../lib/format";
 import { TrajectoryChart } from "../charts";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { Callout, StepCopy, Viz } from "../parts";
 
 export function TrajectoryStep() {
-  const { data, caseData, otherCase } = useCase();
+  const { caseData, otherCase } = useCase();
   const [selected, setSelected] = useState(10);
 
   useEffect(() => setSelected(10), [caseData.id]);
 
   const slot = caseData.slots[selected];
   const recovery = caseData.recovery;
-  const bodeoum = data.cases.bodeoum_tv.recovery;
-  const mimiminu = data.cases.mimiminu.recovery;
 
   return (
     <section className="step">
       <StepCopy
         number="05"
-        label="Trajectory"
+        label="Over time"
         title={
           <>
-            The apology is not automatically the <em>bottom.</em>
+            The apology is not always the <em>bottom.</em>
           </>
         }
-        lede="The trajectory uses each video's mean sentiment, not the pooled comment average. That gives every upload one vote and keeps a single enormous comment section from deciding the shape of the story."
+        lede="Each point is one video. Bodeoum falls around the apology, then recovers. Mimiminu barely moves."
       >
-        <div className="points">
-          <Point label="Slot mean">One point per upload; ten before, the apology, ten after.</Point>
-          <Point label="Bodeoum">
-            {fmtSignedPct(bodeoum.pctCancelVsPre)} at the apology, then{" "}
-            {fmtSignedPct(bodeoum.pctPostVsPre)} above the before baseline. Nadir:{" "}
-            {slotShort(bodeoum.nadirSlot)}.
-          </Point>
-          <Point label="Mimiminu">
-            {fmtSignedPct(mimiminu.pctCancelVsPre)} at the apology and{" "}
-            {fmtSignedPct(mimiminu.pctPostVsPre)} after. Nadir: {slotShort(mimiminu.nadirSlot)}.
-          </Point>
-        </div>
-
         <Callout>
-          {caseData.short}'s apology holds {fmtInt(caseData.windows.cancel.n)} of{" "}
-          {fmtInt(caseData.analyzed)} comments. Pooling would let that one video dominate; the
-          before slot mean is {fmtDecimal(recovery.slotMean.pre)}, not the pooled{" "}
-          {fmtDecimal(caseData.windows.pre.mean)}.
+          One point per video, not per comment. The apology's{" "}
+          {fmtInt(caseData.windows.cancel.n)} comments do not dominate.
         </Callout>
       </StepCopy>
 
       <Viz
-        title="Slot-level sentiment across the apology"
-        meta={`nadir ${slotShort(recovery.nadirSlot)} · ${fmtDecimal(recovery.nadirValue)}`}
-        foot="Click a point to inspect the upload. The dashed line is the other case; both use the same slot grid."
+        title="Average mood across the apology"
+        meta={`lowest ${slotLabel(recovery.nadirSlot)} · ${fmtDecimal(recovery.nadirValue)}`}
+        foot="Tap a point to inspect the video."
       >
         <TrajectoryChart
           caseData={caseData}
@@ -80,7 +63,7 @@ export function TrajectoryStep() {
 
         <div className="trajectory-detail">
           <div className="trajectory-detail__top">
-            <span className={`slot-badge slot-badge--${slot.window}`}>{slotShort(slot.slot)}</span>
+            <span className={`slot-badge slot-badge--${slot.window}`}>{slotLabel(slot.slot)}</span>
             <span>{fmtDate(slot.date)}</span>
             <span>{fmtInt(slot.n)} comments</span>
             <strong>mean {fmtDecimal(slot.sentiment)}</strong>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useCase } from "../../context/CaseContext";
 import { fmtInt, slotShort } from "../../lib/format";
 import { ThreadDiagram } from "../charts";
-import { Callout, Point, StepCopy, Viz } from "../parts";
+import { StepCopy, Viz } from "../parts";
 
 export function NetworkStep() {
   const { caseData } = useCase();
@@ -18,31 +18,19 @@ export function NetworkStep() {
     <section className="step">
       <StepCopy
         number="06"
-        label="Network"
+        label="Replies"
         title={
           <>
-            Turn replies into a <em>graph.</em>
+            Replies become a <em>graph.</em>
           </>
         }
-        lede="A node is a unique author. A directed edge runs from the replier to the author of the parent comment. Repeated replies add weight to the same edge; top-level comments create no edge."
-      >
-        <div className="points">
-          <Point label="Node">One unique author, even if they wrote several comments.</Point>
-          <Point label="Edge">Replier → parent author. The direction is preserved.</Point>
-          <Point label="Why pointers matter">Without parent/root IDs, the conversation collapses into a flat comment list.</Point>
-        </div>
-
-        <Callout>
-          This sample is one real thread: {thread.nodeCount} comments, {thread.authorCount} authors,
-          depth {thread.maxDepth}. The next step aggregates every thread in each window, so its
-          graphs are much larger.
-        </Callout>
-      </StepCopy>
+        lede="Each author is a node. Each arrow points to the person they replied to."
+      />
 
       <Viz
-        title="One thread, rebuilt as a reply graph"
-        meta={`${thread.authorCount} authors · ${thread.edges.length} reply links`}
-        foot="Nodes are numbered; color is the model's sentiment label. Click a node to read the comment and its translation."
+        title="One real conversation"
+        meta={`${thread.authorCount} authors · ${thread.edges.length} replies`}
+        foot="Tap a node to read the comment. Colour is its mood label."
       >
         <ThreadDiagram thread={thread} selectedId={selectedId} onSelect={setSelectedId} />
 
