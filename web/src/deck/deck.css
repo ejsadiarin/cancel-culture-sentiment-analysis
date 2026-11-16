@@ -3786,3 +3786,61 @@ body {
     font-size: 10px;
   }
 }
+
+@media (min-width: 1000px) {
+  .deck-stage {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .deck-slide {
+    max-width: 1320px;
+  }
+
+  .step {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: clamp(26px, 3.2vw, 52px);
+  }
+
+  .viz {
+    padding: 18px;
+  }
+
+  .viz__body {
+    margin-top: 12px;
+  }
+
+  .slot-strip {
+    height: 100px;
+  }
+
+  .slot-cell__bar {
+    max-height: 76px;
+  }
+
+  .slot-cell__label {
+    font-size: 9.5px;
+  }
+
+  .chart-svg {
+    max-height: 350px;
+  }
+
+  .chart-svg--thread {
+    max-height: 460px;
+  }
+}
+
+/* Keep the selected Setup bar at its true height; the old site theme painted the whole cell black. */
+.slot-cell:hover,
+.slot-cell.is-selected {
+  background: transparent;
+  color: var(--ink);
+  border-color: transparent;
+  box-shadow: none;
+}
+.slot-cell:hover .slot-cell__bar,
+.slot-cell.is-selected .slot-cell__bar {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--ink);
+}
