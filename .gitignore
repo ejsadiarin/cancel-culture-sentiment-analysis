@@ -209,3 +209,7 @@ data/*/.tmp_audio/**
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Web source: the site's utility directory is not a Python build artifact
+!web/src/lib/
+!web/src/lib/**

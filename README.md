@@ -4,6 +4,18 @@ Sentiment (emotion) trajectory and social network analysis of cancel culture dis
 
 Current dataset focus: South Korea (KR) longitudinal cases with `pre` / `cancel` / `post` windows (e.g., `data/bodeoum_tv`, `data/mimiminu`).
 
+## Interactive site
+
+The `web/` directory contains a static React walkthrough of the full pipeline, built from the repository's generated CSVs and raw examples. It covers collection, preprocessing, sentiment, network structure, and evaluation, with an interactive case switch for Bodeoum TV and Mimiminu.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+See [`web/README.md`](web/README.md) for the data generator, production build, Docker, and Vercel instructions.
+
 ## Pipeline modules
 
 - `01-collection`: Data collection stage (`youtube_scraper`)
