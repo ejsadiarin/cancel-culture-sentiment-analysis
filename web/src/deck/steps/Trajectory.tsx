@@ -68,6 +68,7 @@ export function TrajectoryStep() {
             <span>{fmtInt(slot.n)} comments</span>
             <strong>mean {fmtDecimal(slot.sentiment)}</strong>
           </div>
+          <span className="detail-kind">Video title</span>
           <p className="trajectory-detail__title">{slot.title}</p>
           <p className="trajectory-detail__translation">{slot.titleEn}</p>
           <div className="trajectory-detail__stats">

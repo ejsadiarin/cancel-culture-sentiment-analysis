@@ -20,15 +20,19 @@ export function DesignStep() {
             The apology is the <em>center.</em>
           </>
         }
-        lede="Each case is 21 videos: ten before the apology, the apology, ten after."
+        lede="Each bar is one video: ten before the apology, the apology, ten after. Bar height shows average mood, not comment count."
       />
 
       <Viz
-        title="The 21-video design"
+        title="Each bar is one video"
         meta={`${caseData.windows.pre.days} days before · ${caseData.windows.post.days} after`}
-        foot="Tap a bar to inspect the video."
+        foot="Tap a bar to inspect that video."
       >
-        <div className="slot-strip" role="group" aria-label="Video slots">
+        <div
+          className="slot-strip"
+          role="group"
+          aria-label="21 video slots; bar height shows average mood, not comment count"
+        >
           {caseData.slots.map((item, index) => (
             <button
               key={item.slot}
@@ -36,7 +40,7 @@ export function DesignStep() {
               className={`slot-cell slot-cell--${item.window} ${index === selected ? "is-selected" : ""}`}
               onClick={() => setSelected(index)}
               aria-pressed={index === selected}
-              title={`${slotShort(item.slot)} · ${item.title}`}
+              title={`Video ${slotShort(item.slot)} · ${item.title}`}
             >
               <span
                 className="slot-cell__bar"
@@ -50,12 +54,22 @@ export function DesignStep() {
           ))}
         </div>
 
+        <div className="bar-key">
+          <span>
+            <b>Each bar</b> = one video
+          </span>
+          <span>
+            <b>Height</b> = average mood, not comment count
+          </span>
+        </div>
+
         <div className="slot-detail">
           <div className="slot-detail__top">
             <span className={`slot-badge slot-badge--${slot.window}`}>{slotLabel(slot.slot)}</span>
             <span className="slot-detail__date">{fmtDate(slot.date)}</span>
             <span className="slot-detail__n">{fmtInt(slot.n)} comments</span>
           </div>
+          <span className="detail-kind">Video title</span>
           <h3>{slot.title}</h3>
           <p className="slot-detail__translation">{slot.titleEn}</p>
           <div className="slot-detail__stats">

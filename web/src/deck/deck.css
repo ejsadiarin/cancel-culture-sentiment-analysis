@@ -3740,3 +3740,49 @@ body {
     max-height: 300px;
   }
 }
+
+/* Setup: make the unit of each bar explicit */
+.bar-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 8px 0 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.bar-key b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.detail-kind {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.trajectory-detail .detail-kind {
+  margin-top: 5px;
+}
+
+.slot-detail__translation,
+.trajectory-detail__translation {
+  font-style: italic;
+}
+
+@media (max-width: 820px) {
+  .bar-key {
+    font-size: 11px;
+  }
+
+  .detail-kind {
+    font-size: 10px;
+  }
+}
