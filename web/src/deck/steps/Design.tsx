@@ -20,8 +20,9 @@ export function DesignStep() {
             The apology is the <em>center.</em>
           </>
         }
-        lede="Each bar is one video: ten before the apology, the apology, ten after. Bar height shows average mood, not comment count."
+        lede="21 videos slots. Each bar is one video: ten before the apology, the apology, ten after."
       />
+      <p> Bar height shows average mood, not comment count. </p>
 
       <Viz
         title="Each bar is one video"
@@ -59,7 +60,7 @@ export function DesignStep() {
             <b>Each bar</b> = one video
           </span>
           <span>
-            <b>Height</b> = average mood, not comment count
+            <b>Height</b> = average mood (not comment count)
           </span>
         </div>
 
